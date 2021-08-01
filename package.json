@@ -1,0 +1,42 @@
+{
+	"name": "videopoker-dapp",
+	"description": "A Videopoker implementation in solidity/react using VRF",
+	"version": "1.0.0",
+	"private": true,
+	"dependencies": {
+		"@chainlink/contracts": "^0.2.1",
+		"@testing-library/jest-dom": "^5.14.1",
+		"@testing-library/react": "^11.2.7",
+		"@testing-library/user-event": "^12.8.3",
+		"node-sass": "^6.0.1",
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2",
+		"react-scripts": "4.0.3",
+		"solc": "^0.8.6",
+		"truffle": "^5.4.3",
+		"web-vitals": "^1.1.2",
+		"web3": "^1.4.0"
+	},
+	"scripts": {
+		"start": "react-scripts start",
+		"build": "react-scripts build",
+		"compile": "truffle compile",
+		"test": "truffle test"
+	},
+	"eslintConfig": {
+		"extends": [
+			"react-app",
+			"react-app/jest"
+		]
+	},
+	"browserslist": {
+		"production": [
+			"last 20 chrome version",
+			"last 20 firefox version"
+		],
+		"development": [
+			"last 1 chrome version",
+			"last 1 firefox version"
+		]
+	}
+}

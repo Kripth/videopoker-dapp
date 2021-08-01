@@ -1,0 +1,14 @@
+[
+	{
+		"address": "0x57c958c82e2b0ad77ff1aa63acad22a5f209951b",
+		"name": "BSC Testnet",
+		"unit": "BNB",
+		"coingecko": "binancecoin"
+	},
+	{
+		"address": "0x41c356d798ea59edcf3eab146a8bec4c39155420",
+		"name": "Matic Testnet",
+		"unit": "MATIC",
+		"coingecko": "matic-network"
+	}
+]
