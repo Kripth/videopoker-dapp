@@ -1,15 +1,6 @@
-/* global BigInt */
 import Web3 from "web3";
 import json from "../assets/abi.json";
-import { WEI } from "./const";
-
-function random() {
-	let value = 0n;
-	for(let i=0; i<8; i++) {
-		value |= BigInt(Math.floor(Math.random() * 2147483648)) << BigInt(i * 31);
-	}
-	return value;
-}
+import { random } from "./util";
 
 export class Contract {
 
@@ -29,8 +20,13 @@ export class Contract {
 		return this.contract.methods[method](...args).call({from: this.address});
 	}
 
+	/**
+	 * @param {string} method
+	 * @param {bigint} value
+	 * @param {*} args
+	 */
 	send(method, value, ...args) {
-		return this.contract.methods[method](...args).send({from: this.address, value});
+		return this.contract.methods[method](...args).send({from: this.address, value: value.toString()});
 	}
 
 	/**
@@ -45,19 +41,19 @@ export class Contract {
 	}
 
 	async updateBalance() {
-		return this.balance = await this.web3.eth.getBalance(this.address);
+		return this.balance = BigInt(await this.web3.eth.getBalance(this.address));
 	}
 
 	async updateMin() {
-		return this.min = +(await this.call("getMinBet"));
+		return this.min = BigInt(await this.call("getMinBet"));
 	}
 
 	async updateMax() {
-		return this.max = +(await this.call("getMaxBet"));
+		return this.max = BigInt(await this.call("getMaxBet"));
 	}
 
-	deposit(amount) {
-		return this.send("deposit", amount * WEI);
+	async getGasPrice() {
+		return BigInt(await this.web3.eth.getGasPrice());
 	}
 
 	async getGame(id) {
@@ -87,7 +83,7 @@ export class Contract {
 	}
 
 	/**
-	 * @param {number} bet
+	 * @param {bigint} bet
 	 * @returns {Promise<{bet, cards}>}
 	 */
 	start(bet) {
@@ -119,10 +115,8 @@ export class Contract {
 export async function createContract(contractAddress) {
 	const eth = window.ethereum;
 	if(eth) {
-		await eth.send("eth_requestAccounts");
+		const [ address ] = await window.ethereum.request({ method: 'eth_requestAccounts' });
 		const web3 = new Web3(eth);
-		//console.log(await web3.eth.net.getId());
-		const [ address ] = await web3.eth.getAccounts();
 		const contract = new web3.eth.Contract(json, contractAddress);
 		return new Contract(web3, address, contract);
 	}

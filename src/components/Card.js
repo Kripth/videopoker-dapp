@@ -1,3 +1,5 @@
+import { card } from "../util/audio";
+
 const JACK = 9;
 const QUEEN = 10;
 const KING = 11;
@@ -30,7 +32,7 @@ export default function Card({index, value, flipped = false}){
 	const name = `card${index}`;
 
 	return <div className={flipped ? "card flipped" : "card"}>
-		<input id={name} type="checkbox" name={name} />
+		<input id={name} type="checkbox" name={name} onChange={card} />
 		<label htmlFor={name} className={classNames[type]}>
 			<span className="value">{values[number] || (2 + number)}</span>
 			<span className="suit" />

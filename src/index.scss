@@ -1,3 +1,12 @@
+:root {
+	$color-primary: #1ca6f6;
+	$color-primary-accent: #1896d4;
+	--color-primary: #{$color-primary};
+	--color-primary-accent: #{$color-primary-accent};
+	--color-primary-disabled: #{mix($color-primary, #fff)};
+	--color-primary-accent-disabled: #{mix($color-primary-accent, #fff)};
+}
+
 * {
 	box-sizing: border-box;
 }
@@ -101,7 +110,7 @@ input, select {
 
 button {
 	position: relative;
-	background: #1cb0f6;
+	background: var(--color-primary);
 	color: #fff;
 	text-transform: uppercase;
 	font-weight: bold;
@@ -116,10 +125,10 @@ button {
 		right: 0;
 		z-index: -1;
 		border-radius: 1rem;
-		background: #1899d6;
+		background: var(--color-primary-accent);
 	}
 
-	&:active {
+	&:not(:disabled):active {
 		margin-top: .25rem;
 		margin-bottom: 0;
 		&::after {
@@ -133,9 +142,9 @@ button {
 	}
 
 	&:disabled {
-		background: #8dd7fa;
+		background: var(--color-primary-disabled);
 		&::after {
-			background: #8bccea;
+			background: var(--color-primary-accent-disabled);
 		}
 	}
 
@@ -168,6 +177,7 @@ button {
 
 	display: flex;
 	align-items: center;
+	justify-content: center;
 
 	&.force-margin, &:not(:last-child) {
 		margin-bottom: 1rem;
@@ -216,6 +226,7 @@ button {
 	width: 100%;
 	font-size: 2.5rem;
 	letter-spacing: 0;
+	user-select: none;
 
 	input {
 		opacity: 0;
@@ -235,6 +246,7 @@ button {
 		border-bottom-width: .25rem;
 		width: 100%;
 		padding: calc(70% - .375em) 0;
+		transition: transform .1s ease-in-out;
 
 		&.hearts, &.diamonds {
 			color: #ff6464;
@@ -277,19 +289,25 @@ button {
 		}
 	}
 
-	&:not(.flipped) input:checked + label {
+	&:not(.flipped):not(:disabled) input:checked + label {
 		//transform: translateY(-1rem);
 	}
 
-	input:checked + label::before {
-		content: "HOLD";
-		position: absolute;
-		top: -1.25rem;
-		left: 0;
-		right: 0;
-		text-align: center;
-		font-size: 1rem;
-		line-height: 1rem;
+	input:not(:disabled):checked + label {
+		transform: translateY(-1.5rem);
+
+		&::after {
+			content: "HOLD";
+			position: absolute;
+			bottom: -1.75rem;
+			left: 0;
+			right: 0;
+			text-align: center;
+			font-size: 1rem;
+			font-weight: bold;
+			line-height: 1rem;
+			color: #bababa;
+		}
 	}
 
 	&.flipped label {
@@ -357,7 +375,7 @@ button {
 	button {
 		min-width: 7rem;
 	}
-	a + a {
+	.nav + .nav {
 		margin-left: .5rem;
 	}
 }

@@ -1,12 +1,12 @@
 export default function Footer({ address }) {
 
-	const ref = name => `/#${name}${address ? `/${address}` : ""}`;
+	const ref = (name, address, ...args) => `#${name}${address ? [address, ...args].map(v => "/" + v).join("") : ""}`;
 
 	return <div className="footer-component">
 		<div className="links">
-			<a href={ref("play")}>Play</a>
-			<a href={ref("history")}>History</a>
-			<a href="/#howtoplay">How to play</a>
+			<a href={ref("play", address)}>Play</a>
+			<a href={ref("history", address, "1")}>History</a>
+			<a href="#howtoplay">How to play</a>
 		</div>
 		<div className="suits">
 			<div className="suit hearts" />

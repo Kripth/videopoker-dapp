@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import Card from "./Card";
 import { parse } from "./Cards";
 import ContractForm from "./ContractForm";
-import { WEI, Results } from "../util/const";
-import { format } from "../util/util";
+import * as audio from "../util/audio";
+import { Results } from "../util/const";
+import { toBigInt, format } from "../util/util";
 
 /**
  * @param {string} address
@@ -21,8 +22,6 @@ export default function Play({ address, resume }) {
 
 	const [ unit, setUnit ] = useState("");
 	const [ balance, setBalance ] = useState(undefined);
-	const [ min, setMin ] = useState(0);
-	const [ max, setMax ] = useState(0);
 
 	const [ cards, setCards ] = useState(null);
 	const [ flipped, setFlipped ] = useState([]);
@@ -32,20 +31,18 @@ export default function Play({ address, resume }) {
 
 	function updateImpl(contract) {
 		return Promise.all([
-			contract.updateBalance().then(setBalance),
-			contract.updateMin().then(setMin),
-			contract.updateMax().then(setMax)
+			contract.updateBalance().then(value => {
+				setBalance(value);
+				return value;
+			}),
+			contract.updateMin(),
+			contract.updateMax()
 		]);
 	}
 
 	function update() {
 		return updateImpl(contract);
 	}
-
-	useEffect(() => {
-		const interval = setInterval(() => contract && update(), 30000);
-		return () => clearInterval(interval);
-	}, []);
 
 	async function initContract(contract, info) {
 		if(contract) {
@@ -54,10 +51,12 @@ export default function Play({ address, resume }) {
 			setUnit(unit || "");
 			//TODO convert prices with coingecko API
 			// calculate optimal bet
-			const best = Math.min(Math.max(contract.balance / 10, contract.min), contract.max);
-			bet.current.value = best / WEI;
+			let best = contract.balance / 10n;
+			if(best > contract.max) best = contract.max;
+			else if(best < contract.min) best = contract.min;
+			bet.current.value = format(best, 5);
 			// update hash
-			window.history.replaceState({}, "", `#play/${info.address}`);
+			window.location.hash = `#play/${info.address}`;
 			// resume game
 			if(resume) {
 				const game = await contract.getGame(resume);
@@ -80,19 +79,20 @@ export default function Play({ address, resume }) {
 	}
 
 	async function setMaxBet() {
-		await update();
-		bet.current.value = format(Math.min(contract.max, contract.balance));
+		const [ gas ] = await Promise.all([contract.getGasPrice(), update()]);
+		const balance = contract.balance - gas * 310000n;
+		bet.current.value = format(contract.max < balance ? contract.max : balance);
 	}
 
 	async function start(data) {
-		const bet = Math.floor(data.get("bet") * WEI);
+		const bet = toBigInt(data.get("bet"));
 		await update();
 		if(bet > contract.max) {
-			setError("Bet too high");
+			throw new Error("Bet too high");
 		} else if(bet < contract.min) {
-			setError("Bet too low");
+			throw new Error("Bet too low");
 		} else if(bet > contract.balance) {
-			setError("Insufficient balance");
+			throw new Error("Insufficient balance");
 		} else {
 			setCards(null);
 			setFlipped([]);
@@ -101,6 +101,7 @@ export default function Play({ address, resume }) {
 			setCards(cards);
 			setBalance(balance - bet);
 			setPlaying(true);
+			audio.draw();
 		}
 	}
 
@@ -122,11 +123,13 @@ export default function Play({ address, resume }) {
 		if(index) {
 			if(payout > 0) {
 				// update balance
-				setBalance(balance + +payout);
+				setBalance(balance + BigInt(payout));
 			}
 			setResult({ index, payout });
+			audio.win();
 		} else {
 			setResult(null);
+			audio.loss();
 		}
 		setCards(cards);
 		setPlaying(false);
@@ -139,38 +142,45 @@ export default function Play({ address, resume }) {
 		try {
 			await (playing ? end : start)(new FormData(event.target));
 		} catch(e) {
-			//FIXME improve error message
-			console.warn(e.receipt);
+			//FIXME improve error message for contract errors
 			setError(e.message);
+			audio.error();
 		}
 		setLoading(false);
 	}
+
+	useEffect(() => {
+		if(contract) {
+			const interval = setInterval(update, 30000);
+			return () => clearInterval(interval);
+		}
+	}, [contract]);
 
 	return <>
 		<ContractForm address={address} setError={setError} setContract={initContract} />
 		<form onSubmit={submit}>
 			<fieldset disabled={loading || !contract}>
 				<div className="row">
-					<label className="label">Balance</label>
+					<label htmlFor="input-balance" className="label">Balance</label>
 					<div className="value">
-						<input disabled={true} value={balance >= 0 ? `${format(balance)} ${unit}` : ""} />
+						<input id="input-balance" disabled={true} value={balance >= 0n ? `${format(balance)} ${unit}` : ""} />
 					</div>
 				</div>
 				<div className="row">
-					<label className="label">Bet</label>
-					<div className="value group">
-						<input ref={bet} type="number" name="bet" step={1 / WEI} min={format(min)} max={format(max)} disabled={playing} spellCheck={false} />
+					<label htmlFor="input-bet" className="label">Bet</label>
+					<fieldset className="value group" disabled={playing}>
+						<input ref={bet} id="input-bet" name="bet" spellCheck={false} />
 						<button type="button" onClick={setMinBet}>Min</button>
 						<button type="button" onClick={setMaxBet}>Max</button>
-					</div>
+					</fieldset>
 				</div>
 				<div className="row cards-wrapper">
-					<div className="cards">
+					<fieldset className="cards" disabled={!playing}>
 						{cards ?
 							parse(cards).map((value, i) => <Card key={"" + i + playing} index={i} value={value} flipped={flipped[i]} />) :
 							Array(5).fill().map((_, i) => <Card key={"flipped" + i} index={i} value={0} flipped />)
 						}
-					</div>
+					</fieldset>
 				</div>
 				<div className="row">
 					<button type="submit" id="play-button" className={loading ? "loading" : ""}>

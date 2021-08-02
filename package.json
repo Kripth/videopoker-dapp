@@ -15,7 +15,7 @@
 		"solc": "^0.8.6",
 		"truffle": "^5.4.3",
 		"web-vitals": "^1.1.2",
-		"web3": "^1.4.0"
+		"web3": "^1.5.0"
 	},
 	"scripts": {
 		"start": "react-scripts start",
@@ -27,7 +27,10 @@
 		"extends": [
 			"react-app",
 			"react-app/jest"
-		]
+		],
+		"globals": {
+			"BigInt": true
+		}
 	},
 	"browserslist": {
 		"production": [

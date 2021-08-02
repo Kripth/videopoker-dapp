@@ -1,4 +1,4 @@
-export const WEI = 1000000000000000000;
+export const WEI = 1000000000000000000n;
 
 export const Results = [
 	"Jacks or better",
