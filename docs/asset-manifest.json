@@ -1,21 +1,26 @@
 {
   "files": {
-    "main.css": "/videopoker-dapp/static/css/main.0ee8545a.chunk.css",
-    "main.js": "/videopoker-dapp/static/js/main.415a359e.chunk.js",
-    "main.js.map": "/videopoker-dapp/static/js/main.415a359e.chunk.js.map",
+    "main.css": "/videopoker-dapp/static/css/main.403a9312.chunk.css",
+    "main.js": "/videopoker-dapp/static/js/main.ba23db8e.chunk.js",
+    "main.js.map": "/videopoker-dapp/static/js/main.ba23db8e.chunk.js.map",
     "runtime-main.js": "/videopoker-dapp/static/js/runtime-main.d3bf3cc3.js",
     "runtime-main.js.map": "/videopoker-dapp/static/js/runtime-main.d3bf3cc3.js.map",
-    "static/js/2.43d206ef.chunk.js": "/videopoker-dapp/static/js/2.43d206ef.chunk.js",
-    "static/js/2.43d206ef.chunk.js.map": "/videopoker-dapp/static/js/2.43d206ef.chunk.js.map",
+    "static/js/2.1a17b10d.chunk.js": "/videopoker-dapp/static/js/2.1a17b10d.chunk.js",
+    "static/js/2.1a17b10d.chunk.js.map": "/videopoker-dapp/static/js/2.1a17b10d.chunk.js.map",
     "index.html": "/videopoker-dapp/index.html",
-    "static/css/main.0ee8545a.chunk.css.map": "/videopoker-dapp/static/css/main.0ee8545a.chunk.css.map",
-    "static/js/2.43d206ef.chunk.js.LICENSE.txt": "/videopoker-dapp/static/js/2.43d206ef.chunk.js.LICENSE.txt",
-    "static/media/index.scss": "/videopoker-dapp/static/media/spades.98fd30bf.svg"
+    "static/css/main.403a9312.chunk.css.map": "/videopoker-dapp/static/css/main.403a9312.chunk.css.map",
+    "static/js/2.1a17b10d.chunk.js.LICENSE.txt": "/videopoker-dapp/static/js/2.1a17b10d.chunk.js.LICENSE.txt",
+    "static/media/card.bad10dba.mp3": "/videopoker-dapp/static/media/card.bad10dba.mp3",
+    "static/media/index.scss": "/videopoker-dapp/static/media/spades.98fd30bf.svg",
+    "static/media/draw.d1037966.mp3": "/videopoker-dapp/static/media/draw.d1037966.mp3",
+    "static/media/error.0c2f182b.mp3": "/videopoker-dapp/static/media/error.0c2f182b.mp3",
+    "static/media/loss.76807f79.mp3": "/videopoker-dapp/static/media/loss.76807f79.mp3",
+    "static/media/win.8edc9ff0.mp3": "/videopoker-dapp/static/media/win.8edc9ff0.mp3"
   },
   "entrypoints": [
     "static/js/runtime-main.d3bf3cc3.js",
-    "static/js/2.43d206ef.chunk.js",
-    "static/css/main.0ee8545a.chunk.css",
-    "static/js/main.415a359e.chunk.js"
+    "static/js/2.1a17b10d.chunk.js",
+    "static/css/main.403a9312.chunk.css",
+    "static/js/main.ba23db8e.chunk.js"
   ]
 }
