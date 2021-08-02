@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Card from "./Card";
 import { parse } from "./Cards";
 import ContractForm from "./ContractForm";
+import * as audio from "../util/audio";
 import { WEI, Results } from "../util/const";
 import { format } from "../util/util";
 
@@ -55,7 +56,7 @@ export default function Play({ address, resume }) {
 			//TODO convert prices with coingecko API
 			// calculate optimal bet
 			const best = Math.min(Math.max(contract.balance / 10, contract.min), contract.max);
-			bet.current.value = best / WEI;
+			bet.current.value = format(best);
 			// update hash
 			window.history.replaceState({}, "", `#play/${info.address}`);
 			// resume game
@@ -87,12 +88,14 @@ export default function Play({ address, resume }) {
 	async function start(data) {
 		const bet = Math.floor(data.get("bet") * WEI);
 		await update();
-		if(bet > contract.max) {
-			setError("Bet too high");
+		if(isNaN(bet)) {
+			throw new Error("Invalid bet");
+		} else if(bet > contract.max) {
+			throw new Error("Bet too high");
 		} else if(bet < contract.min) {
-			setError("Bet too low");
+			throw new Error("Bet too low");
 		} else if(bet > contract.balance) {
-			setError("Insufficient balance");
+			throw new Error("Insufficient balance");
 		} else {
 			setCards(null);
 			setFlipped([]);
@@ -101,6 +104,7 @@ export default function Play({ address, resume }) {
 			setCards(cards);
 			setBalance(balance - bet);
 			setPlaying(true);
+			audio.draw();
 		}
 	}
 
@@ -125,8 +129,10 @@ export default function Play({ address, resume }) {
 				setBalance(balance + +payout);
 			}
 			setResult({ index, payout });
+			audio.win();
 		} else {
 			setResult(null);
+			audio.loss();
 		}
 		setCards(cards);
 		setPlaying(false);
@@ -139,9 +145,9 @@ export default function Play({ address, resume }) {
 		try {
 			await (playing ? end : start)(new FormData(event.target));
 		} catch(e) {
-			//FIXME improve error message
-			console.warn(e.receipt);
+			//FIXME improve error message for contract errors
 			setError(e.message);
+			audio.error();
 		}
 		setLoading(false);
 	}
@@ -158,19 +164,19 @@ export default function Play({ address, resume }) {
 				</div>
 				<div className="row">
 					<label className="label">Bet</label>
-					<div className="value group">
-						<input ref={bet} type="number" name="bet" step={1 / WEI} min={format(min)} max={format(max)} disabled={playing} spellCheck={false} />
+					<fieldset className="value group" disabled={playing}>
+						<input ref={bet} type="number" name="bet" step={1 / WEI} min={format(min)} max={format(max)} spellCheck={false} />
 						<button type="button" onClick={setMinBet}>Min</button>
 						<button type="button" onClick={setMaxBet}>Max</button>
-					</div>
+					</fieldset>
 				</div>
 				<div className="row cards-wrapper">
-					<div className="cards">
+					<fieldset className="cards" disabled={!playing}>
 						{cards ?
 							parse(cards).map((value, i) => <Card key={"" + i + playing} index={i} value={value} flipped={flipped[i]} />) :
 							Array(5).fill().map((_, i) => <Card key={"flipped" + i} index={i} value={0} flipped />)
 						}
-					</div>
+					</fieldset>
 				</div>
 				<div className="row">
 					<button type="submit" id="play-button" className={loading ? "loading" : ""}>
