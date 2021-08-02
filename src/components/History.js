@@ -41,7 +41,7 @@ export default function History({ address = "", page = 1 }) {
 			setUnit(info.unit || "");
 			await load(contract, page - 1, games);
 			// update hash
-			window.history.replaceState({}, "", `#history/${info.address}/${page}`);
+			window.location.hash = `#history/${info.address}/${page}`;
 		} else {
 			setLoaded(null);
 			setGames(null);
@@ -53,9 +53,9 @@ export default function History({ address = "", page = 1 }) {
 	return <>
 		<ContractForm address={address} setError={console.warn} setContract={initContract} />
 		<div className="row">
-			<label className="label">Order by</label>
+			<label id="input-order" className="label">Order by</label>
 			<div className="value">
-				<select disabled onChange={updateOrder}>
+				<select id="input-order" disabled onChange={updateOrder}>
 					<option value="desc">Newest</option>
 					<option value="asc">Oldest</option>
 				</select>
@@ -78,7 +78,7 @@ export default function History({ address = "", page = 1 }) {
 									<button type="button">Resume</button>
 								</a> : game.result ? <>
 									<div>{Results[game.result - 1]}</div>
-									<div>{format(game.payout, 10)} {unit}</div>
+									<div>{format(game.payout, 8)} {unit}</div>
 								</> : ""}
 							</td>
 						</tr>)}
@@ -88,10 +88,18 @@ export default function History({ address = "", page = 1 }) {
 			<div className="row history-footer">
 				<span>Page {page} of {pages}</span>
 				<div style={{flexGrow: 1}} />
-				{page > 1 && pages > 1 && <a href={`#history/${address}/${page - 1}`}><button>Previous</button></a>}
-				{page < pages && <a href={`#history/${address}/${+page + 1}`}><button>Next</button></a>}
+				<Page enabled={page > 1 && pages > 1} href={`#history/${address}/${page - 1}`}>Previous</Page>
+				<Page enabled={page < pages} href={`#history/${address}/${+page + 1}`}>Next</Page>
 			</div>
 		</>}
 	</>
 
+}
+
+function Page({ enabled, href, children }) {
+	if(enabled) {
+		return <a className="nav" href={href}><button>{children}</button></a>
+	} else {
+		return <button className="nav" disabled>{children}</button>
+	}
 }
