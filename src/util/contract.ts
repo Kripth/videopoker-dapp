@@ -113,7 +113,7 @@ export class Contract {
 /**
  *
  * @param {string} contractAddress
- * @returns {Promise<Contract> | undefined}
+ * @returns {Promise<Contract>}
  */
 export async function createContract(contractAddress: string) {
 	// @ts-ignore
@@ -124,5 +124,7 @@ export async function createContract(contractAddress: string) {
 		// @ts-ignore
 		const contract = new web3.eth.Contract(json, contractAddress);
 		return new Contract(web3, address, contract);
+	} else {
+		throw new Error("Could not detect wallet extension");
 	}
 }
