@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./Videopoker.sol";
+import "../Videopoker.sol";
 
 contract VideopokerImplTest is Videopoker {
-
-	constructor() Videopoker() payable {}
 
 	function prepareRandomnessStart(uint gameId) internal override {
 		handleRandomnessStart(gameId, randomness());
@@ -16,7 +14,7 @@ contract VideopokerImplTest is Videopoker {
 	}
 
 	function randomness() internal view returns (uint256) {
-		return uint256(keccak256(abi.encodePacked(block.difficulty, block.timestamp)));
+		return uint256(keccak256(abi.encodePacked(msg.sender, block.difficulty, block.timestamp)));
 	}
 
 }
