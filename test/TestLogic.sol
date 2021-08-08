@@ -6,19 +6,19 @@ import "../contracts/VideopokerLogic.sol";
 
 contract TestLogic is VideopokerLogic {
 
-	uint private constant ACE = 12;
-	uint private constant TWO = 0;
-	uint private constant THREE = 1;
-	uint private constant FOUR = 2;
-	uint private constant FIVE = 3;
-	uint private constant SIX = 4;
-	uint private constant SEVEN = 5;
-	uint private constant EIGHT = 6;
-	uint private constant NINE = 7;
-	uint private constant TEN = 8;
-	uint private constant JACK = 9;
-	uint private constant QUEEN = 10;
-	uint private constant KING = 11;
+	uint private constant ACE = 13;
+	uint private constant TWO = 1;
+	uint private constant THREE = 2;
+	uint private constant FOUR = 3;
+	uint private constant FIVE = 4;
+	uint private constant SIX = 5;
+	uint private constant SEVEN = 6;
+	uint private constant EIGHT = 7;
+	uint private constant NINE = 8;
+	uint private constant TEN = 9;
+	uint private constant JACK = 10;
+	uint private constant QUEEN = 11;
+	uint private constant KING = 12;
 
 	uint private constant HEARTS = 0;
 	uint private constant DIAMONDS = 16;

@@ -4,7 +4,7 @@ import _draw from "../assets/audio/draw.mp3";
 import _loss from "../assets/audio/loss.mp3";
 import _win from "../assets/audio/win.mp3";
 
-function audio(src) {
+function audio(src: string) {
 	const instance = new Audio(src);
 	return () => {
 		instance.volume = 1;

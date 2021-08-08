@@ -1,18 +1,19 @@
-import Card from "./Card";
+import { card as cardClick } from "../util/audio";
+import { parse } from "../util/cards";
+import "../styles/cards.scss";
 
-/**
- * @param {number} cards
- * @returns {number[]}
- */
-export function parse(cards) {
-	return Array(5).fill().map((_, i) => {
-		const offset = i * 6;
-		return (cards & (0b111111 << offset)) >> offset;
-	});
+function Card({card, name, flipped = false}){
+	return <div className={flipped ? "card flipped" : "card"}>
+		<input id={name} type="checkbox" name={name} onChange={cardClick} />
+		<label htmlFor={name} className={card.className}>
+			<span className="value">{card.value}</span>
+			<span className="suit" />
+		</label>
+	</div>
 }
 
-export default function Cards({cards}) {
-	return <div className="cards">
-		{parse(cards).map((value, i) => <Card key={i} index={i} value={value} />)}
+export default function Cards({ cards, flipped = [] }) {
+	return <div className="cards-component">
+		{parse(cards).map((card, i) => <Card key={i} card={card} name={`card${i}`} flipped={flipped[i]} />)}
 	</div>
 }

@@ -1,0 +1,37 @@
+@import "./base";
+
+.app-component {
+
+	.app-component-title {
+		margin: 1rem 0;
+		text-align: center;
+		font-size: 2rem;
+		font-weight: bold;
+	}
+
+	.app-component-content {
+		margin: auto;
+		width: 44rem;
+		border: .125rem solid #e4e4e4;
+		border-radius: 2rem;
+		padding: 2rem;
+	}
+
+	@media screen and (max-width: $mobile) {
+
+		.app-component-title {
+			font-size: 1.75rem;
+		}
+
+		.app-component-content {
+			width: 100%;
+			margin: 0;
+			padding: 1rem;
+			border-left-width: 0;
+			border-right-width: 0;
+			border-radius: 0;
+		}
+
+	}
+
+}

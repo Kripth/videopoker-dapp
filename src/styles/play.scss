@@ -1,0 +1,45 @@
+@import "./base";
+
+.play-component {
+
+	.play-component-play-button {
+		margin-left: auto;
+		margin-right: auto;
+		width: 16rem;
+		max-width: 100%;
+		padding: .875rem 1rem;
+
+		&::before {
+			font-size: 1rem;
+		}
+	}
+
+	.play-component-cards {
+		margin-top: 2.5rem;
+		margin-bottom: 2.5rem !important;
+	}
+
+	.play-component-result {
+		margin: auto;
+		font-size: 2rem;
+		font-weight: bold;
+		text-align: center;
+
+		& > .amount {
+			color: #58a700;
+		}
+	}
+
+	@media screen and (max-width: $mobile) {
+
+		.play-component-cards {
+			margin: 2rem 0;
+		}
+
+		.play-component-result {
+			font-size: 1.25rem;
+		}
+
+	}
+
+}

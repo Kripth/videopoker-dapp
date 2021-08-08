@@ -1,0 +1,84 @@
+@import "./base";
+
+.history-component {
+
+	.history-component-game {
+
+		margin-top: 1rem;
+
+		.results {
+			display: flex;
+			width: 100%;
+			align-items: center;
+			margin-top: .5rem;
+
+			& > .cards {
+				flex-grow: 1;
+			}
+
+			& > .result {
+				font-size: 1.25rem;
+				font-weight: bold;
+				text-align: center;
+				width: 14rem;
+			}
+
+		}
+
+		.cards-component .card {
+			font-size: 1.75rem;
+		}
+
+	}
+
+	.history-component-footer {
+
+		.spacer {
+			flex-grow: 1;
+		}
+
+		button {
+			min-width: 7rem;
+		}
+
+		.nav + .nav {
+			margin-left: .5rem;
+		}
+
+	}
+
+	@media screen and (max-width: $mobile) {
+
+		.history-component-game .results {
+			flex-direction: column;
+
+			.cards {
+				width: 100%;
+			}
+
+			.result {
+				padding-top: .5rem;
+			}
+
+			.cards-component .card {
+				font-size: 6vw;
+			}
+		}
+
+		.history-component-footer {
+
+			flex-direction: row;
+
+			button {
+				min-width: 7rem;
+			}
+
+			.nav + .nav {
+				margin-left: .5rem;
+			}
+
+		}
+
+	}
+
+}

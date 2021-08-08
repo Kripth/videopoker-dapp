@@ -1,0 +1,18 @@
+@import "./base";
+
+.error-component {
+
+	text-align: center;
+	font-size: 1.5rem;
+	color: #ff4b4b;
+	max-width: 40rem;
+	overflow-x: auto;
+
+	@media screen and (max-width: $mobile) {
+
+		font-size: 1.25rem;
+		max-width: calc(100vw - 2rem);
+
+	}
+
+}
