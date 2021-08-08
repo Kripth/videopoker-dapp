@@ -1,7 +1,6 @@
 import Web3 from "web3";
 import { Contract as Web3Contract, EventData } from "web3-eth-contract";
 import json from "../assets/abi.json";
-import { random } from "./util";
 
 interface Game {
 	id: bigint;
@@ -12,6 +11,17 @@ interface Game {
 	cards: number;
 	change?: number;
 	date: Date
+}
+
+/**
+ * Creates a random number to be used as game id.
+ */
+function random(): bigint {
+	let value = 0n;
+	for(let i=0; i<8; i++) {
+		value |= BigInt(Math.floor(Math.random() * 2147483648)) << BigInt(i * 31);
+	}
+	return value;
 }
 
 export class Contract {

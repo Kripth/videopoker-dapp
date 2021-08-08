@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Cards from "./Cards";
 import ContractForm from "./ContractForm";
 import { Results } from "../util/const";
-import { format } from "../util/util";
+import { formatDate, formatNumber } from "../util/format";
 import "../styles/history.scss";
 
 function changedToFlipped(changed) {
@@ -25,6 +25,7 @@ export default function History({ address = "", page = 1 }) {
 	const [ pages, setPages ] = useState(null);
 	const [ games, setGames ] = useState(null);
 	const [ loaded, setLoaded ] = useState(null);
+	const [ changed, setChanged ] = useState(null);
 
 	useEffect(() => {
 		if(contract && games) {
@@ -32,10 +33,17 @@ export default function History({ address = "", page = 1 }) {
 		}
 	}, [page]);
 
+	useEffect(() => {
+		const interval = setInterval(() => changed && load(contract, page - 1, games), 5000);
+		return () => clearInterval(interval);
+	});
+
 	async function load(contract, page, games) {
 		// load pages from games
 		const i = page * pageSize;
-		setLoaded(await Promise.all(games.slice(i, i + pageSize).map(gameId => contract.getGame(gameId))));
+		const loaded = await Promise.all(games.slice(i, i + pageSize).map(gameId => contract.getGame(gameId)));
+		setChanged(loaded.some(game => game.change > 0));
+		setLoaded(loaded);
 	}
 
 	function updateOrder(event) {
@@ -74,35 +82,28 @@ export default function History({ address = "", page = 1 }) {
 		</div>
 		{loaded && <>
 			<div className="row">
-				<table className="history-component-table">
-					<thead>
-						<tr>
-							<th>Cards</th>
-							<th>Result</th>
-						</tr>
-					</thead>
-					<tbody>
-						{loaded.map(game => <tr key={game.id}>
-							<td>
-								<fieldset disabled>
-									<Cards cards={game.cards} flipped={changedToFlipped(game.change || 0)} />
-								</fieldset>
-							</td>
-							<td className="result">
+				<div style={{width: "100%"}}>
+					{loaded.map(game => <div key={game.id} className="history-component-game">
+						<div className="date">{formatDate(game.date)}</div>
+						<div className="results">
+							<fieldset className="cards" disabled>
+								<Cards cards={game.cards} flipped={changedToFlipped(game.change || 0)} />
+							</fieldset>
+							<div className="result">
 								{game.playable ? <a href={`/#play/${address}/${game.id}`}>
 									<button type="button">Resume</button>
 								</a> : game.result ? <>
 									<div>{Results[game.result - 1]}</div>
-									<div>{format(game.payout, 8)} {unit}</div>
+									<div>{formatNumber(game.payout, 8)} {unit}</div>
 								</> : ""}
-							</td>
-						</tr>)}
-					</tbody>
-				</table>
+							</div>
+						</div>
+					</div>)}
+				</div>
 			</div>
 			<div className="row history-component-footer">
 				<span>Page {page} of {pages}</span>
-				<div style={{flexGrow: 1}} />
+				<div className="spacer" />
 				<Page enabled={page > 1 && pages > 1} href={`#history/${address}/${page - 1}`}>Previous</Page>
 				<Page enabled={page < pages} href={`#history/${address}/${+page + 1}`}>Next</Page>
 			</div>

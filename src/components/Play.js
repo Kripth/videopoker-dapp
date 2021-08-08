@@ -3,7 +3,7 @@ import Cards from "./Cards";
 import ContractForm from "./ContractForm";
 import * as audio from "../util/audio";
 import { Results } from "../util/const";
-import { toBigInt, format } from "../util/util";
+import { toBigInt, formatNumber } from "../util/format";
 import "../styles/play.scss";
 import Error from "./Error";
 
@@ -59,7 +59,7 @@ export default function Play({ address, resume }) {
 			let best = contract.balance / 10n;
 			if(best > contract.max) best = contract.max;
 			else if(best < contract.min) best = contract.min;
-			bet.current.value = format(best, 5);
+			bet.current.value = formatNumber(best, 5);
 			// update hash
 			window.location.hash = `#play/${info.address}`;
 			// resume game
@@ -67,7 +67,7 @@ export default function Play({ address, resume }) {
 				const game = await contract.getGame(resume);
 				if(game.playable) {
 					contract.gameId = game.id;
-					bet.current.value = format(game.bet);
+					bet.current.value = formatNumber(game.bet);
 					setCards(game.cards);
 					setFlipped(NONE_FLIPPED);
 					setPlaying(true);
@@ -81,13 +81,13 @@ export default function Play({ address, resume }) {
 
 	async function setMinBet() {
 		await update();
-		bet.current.value = format(contract.min);
+		bet.current.value = formatNumber(contract.min);
 	}
 
 	async function setMaxBet() {
 		const [ gas ] = await Promise.all([contract.getGasPrice(), update()]);
 		const balance = contract.balance - gas * 310000n;
-		bet.current.value = format(contract.max < balance ? contract.max : balance);
+		bet.current.value = formatNumber(contract.max < balance ? contract.max : balance);
 	}
 
 	async function start(data) {
@@ -178,7 +178,7 @@ export default function Play({ address, resume }) {
 				<div className="row">
 					<label htmlFor="input-balance" className="label">Balance</label>
 					<div className="value">
-						<input id="input-balance" disabled={true} value={balance >= 0n ? `${format(balance)} ${unit}` : ""} />
+						<input id="input-balance" disabled={true} value={balance >= 0n ? `${formatNumber(balance)} ${unit}` : ""} />
 					</div>
 				</div>
 				<div className="row">
@@ -200,7 +200,7 @@ export default function Play({ address, resume }) {
 				{result && <div className="row">
 					<div className="play-component-result">
 						<div>{Results[result.index - 1]}</div>
-						<div className="amount">+{format(result.payout)} {unit}</div>
+						<div className="amount">+{formatNumber(result.payout)} {unit}</div>
 					</div>
 				</div>}
 				{error && <div className="row"><Error error={error} /></div>}

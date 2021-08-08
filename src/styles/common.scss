@@ -92,10 +92,11 @@ button {
 		&::before {
 			content: "";
 			position: absolute;
-			width: 1rem;
-			height: 1rem;
-			top: calc(50% - .5rem);
-			left: calc(50% - .5rem);
+			font-size: .75rem;
+			width: 1em;
+			height: 1em;
+			top: calc(50% - .5em);
+			left: calc(50% - .5em);
 			border: .125rem solid #fff;
 			border-bottom-color: transparent;
 			border-radius: 1rem;

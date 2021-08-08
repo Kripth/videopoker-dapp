@@ -8,6 +8,10 @@
 		width: 16rem;
 		max-width: 100%;
 		padding: .875rem 1rem;
+
+		&::before {
+			font-size: 1rem;
+		}
 	}
 
 	.play-component-cards {

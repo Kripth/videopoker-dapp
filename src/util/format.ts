@@ -1,17 +1,6 @@
 import { WEI } from "./const";
 
 /**
- * Creates a random number to be used as game id.
- */
-export function random(): bigint {
-	let value = 0n;
-	for(let i=0; i<8; i++) {
-		value |= BigInt(Math.floor(Math.random() * 2147483648)) << BigInt(i * 31);
-	}
-	return value;
-}
-
-/**
  * Parses a decimal number into a bigint.
  *
  * @throws {SyntaxError} When the input contains invalid characters or the format is invalid.
@@ -31,9 +20,10 @@ export function toBigInt(value: string): bigint {
 }
 
 /**
- * @returns {string}
+ * Formats an integer used by the network into a decimal representation without
+ * losing precision.
  */
-export function format(amount: string | bigint, digits = 18): string {
+export function formatNumber(amount: string | bigint, digits = 18): string {
 	const formatEnd = (str: string) => str.slice(0, digits).replace(/0+$/, "");
 	const str = amount.toString();
 	if(str === "0") {
@@ -46,4 +36,18 @@ export function format(amount: string | bigint, digits = 18): string {
 	} else {
 		return `0.${formatEnd(str.padStart(18, "0"))}`
 	}
+}
+
+export function formatDate(date: Date): string {
+	const year = date.getFullYear().toString().padStart(4, "0");
+	const month = pad2(date.getMonth() + 1);
+	const day = pad2(date.getDate());
+	const hours = pad2(date.getHours());
+	const minutes = pad2(date.getMinutes());
+	const seconds = pad2(date.getSeconds());
+	return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+function pad2(value: number): string {
+	return value.toString().padStart(2, "0");
 }
