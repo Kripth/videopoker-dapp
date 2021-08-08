@@ -2,10 +2,8 @@ import { WEI } from "./const";
 
 /**
  * Creates a random number to be used as game id.
- *
- * @returns {bigint}
  */
-export function random() {
+export function random(): bigint {
 	let value = 0n;
 	for(let i=0; i<8; i++) {
 		value |= BigInt(Math.floor(Math.random() * 2147483648)) << BigInt(i * 31);
@@ -16,11 +14,9 @@ export function random() {
 /**
  * Parses a decimal number into a bigint.
  *
- * @param {string} value
- * @returns {bigint}
  * @throws {SyntaxError} When the input contains invalid characters or the format is invalid.
  */
-export function toBigInt(value) {
+export function toBigInt(value: string): bigint {
 	const match = value.match(/^(0|[1-9]\d*)(?:\.(\d{1,18}))?$/);
 	if(match) {
 		if(match[2]) {
@@ -35,12 +31,10 @@ export function toBigInt(value) {
 }
 
 /**
- * @param {bigint|string} amount
- * @param {number} digits
  * @returns {string}
  */
-export function format(amount, digits = 18) {
-	const formatEnd = str => str.slice(0, digits).replace(/0+$/, "");
+export function format(amount: string | bigint, digits = 18): string {
+	const formatEnd = (str: string) => str.slice(0, digits).replace(/0+$/, "");
 	const str = amount.toString();
 	if(str === "0") {
 		return str;

@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import Card from "./Card";
-import { parse } from "./Cards";
+import Cards from "./Cards";
 import ContractForm from "./ContractForm";
 import * as audio from "../util/audio";
 import { Results } from "../util/const";
 import { toBigInt, format } from "../util/util";
+
+const ALL_FLIPPED = Array(5).fill(true);
+const NONE_FLIPPED = Array(5).fill(false);
 
 /**
  * @param {string} address
@@ -14,6 +16,7 @@ import { toBigInt, format } from "../util/util";
 export default function Play({ address, resume }) {
 
 	const bet = useRef();
+	const cardsWrapper = useRef();
 
 	const [ contract, setContract ] = useState(null);
 
@@ -23,8 +26,8 @@ export default function Play({ address, resume }) {
 	const [ unit, setUnit ] = useState("");
 	const [ balance, setBalance ] = useState(undefined);
 
-	const [ cards, setCards ] = useState(null);
-	const [ flipped, setFlipped ] = useState([]);
+	const [ cards, setCards ] = useState(0);
+	const [ flipped, setFlipped ] = useState(ALL_FLIPPED);
 
 	const [ result, setResult ] = useState(null);
 	const [ error, setError ] = useState(null);
@@ -64,6 +67,7 @@ export default function Play({ address, resume }) {
 					contract.gameId = game.id;
 					bet.current.value = format(game.bet);
 					setCards(game.cards);
+					setFlipped(NONE_FLIPPED);
 					setPlaying(true);
 				}
 			}
@@ -94,11 +98,19 @@ export default function Play({ address, resume }) {
 		} else if(bet > contract.balance) {
 			throw new Error("Insufficient balance");
 		} else {
-			setCards(null);
-			setFlipped([]);
+			const previouslyFlipped = flipped;
+			setFlipped(ALL_FLIPPED);
 			setResult(null);
-			const { cards } = await contract.start(bet);
+			const { cards } = await contract.start(bet).finally(() => {
+				// restore to previous game in case of cancel/fail
+				setFlipped(previouslyFlipped);
+			});
+			// make sure no cards are selected
+			for(const input of cardsWrapper.current.querySelectorAll(":checked")) {
+				input.checked = false;
+			}
 			setCards(cards);
+			setFlipped(NONE_FLIPPED);
 			setBalance(balance - bet);
 			setPlaying(true);
 			audio.draw();
@@ -117,7 +129,7 @@ export default function Play({ address, resume }) {
 		setFlipped(flipped);
 		const { cards, result, payout } = await contract.end(replace).finally(() => {
 			// all cards must be visible again when the transaction ends, is cancelled or fails
-			setFlipped([]);
+			setFlipped(NONE_FLIPPED);
 		});
 		const index = +result;
 		if(index) {
@@ -131,7 +143,8 @@ export default function Play({ address, resume }) {
 			setResult(null);
 			audio.loss();
 		}
-		setCards(cards);
+		setCards(Number(BigInt(cards) & 68719476735n)); //FIXME fix event in solidity
+		setFlipped(NONE_FLIPPED);
 		setPlaying(false);
 	}
 
@@ -174,12 +187,9 @@ export default function Play({ address, resume }) {
 						<button type="button" onClick={setMaxBet}>Max</button>
 					</fieldset>
 				</div>
-				<div className="row cards-wrapper">
+				<div ref={cardsWrapper} className="row cards-wrapper">
 					<fieldset className="cards" disabled={!playing}>
-						{cards ?
-							parse(cards).map((value, i) => <Card key={"" + i + playing} index={i} value={value} flipped={flipped[i]} />) :
-							Array(5).fill().map((_, i) => <Card key={"flipped" + i} index={i} value={0} flipped />)
-						}
+						<Cards cards={cards} flipped={flipped} />
 					</fieldset>
 				</div>
 				<div className="row">

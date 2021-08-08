@@ -11,8 +11,8 @@ export function parse(cards) {
 	});
 }
 
-export default function Cards({cards}) {
+export default function Cards({ cards, flipped = [] }) {
 	return <div className="cards">
-		{parse(cards).map((value, i) => <Card key={i} index={i} value={value} />)}
+		{parse(cards).map((value, i) => <Card key={i} index={i} value={value} flipped={flipped[i]} />)}
 	</div>
 }

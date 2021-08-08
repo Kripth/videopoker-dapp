@@ -1,9 +1,9 @@
 import { card } from "../util/audio";
 
-const JACK = 9;
-const QUEEN = 10;
-const KING = 11;
-const ACE = 12;
+const JACK = 10;
+const QUEEN = 11;
+const KING = 12;
+const ACE = 13;
 
 const values = {
 	[JACK]: "J",
@@ -34,7 +34,7 @@ export default function Card({index, value, flipped = false}){
 	return <div className={flipped ? "card flipped" : "card"}>
 		<input id={name} type="checkbox" name={name} onChange={card} />
 		<label htmlFor={name} className={classNames[type]}>
-			<span className="value">{values[number] || (2 + number)}</span>
+			<span className="value">{values[number] || (1 + number)}</span>
 			<span className="suit" />
 		</label>
 	</div>

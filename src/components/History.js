@@ -4,6 +4,16 @@ import ContractForm from "./ContractForm";
 import { Results } from "../util/const";
 import { format } from "../util/util";
 
+function changedToFlipped(changed) {
+	return [
+		(changed & 16) !== 0,
+		(changed & 8) !== 0,
+		(changed & 4) !== 0,
+		(changed & 2) !== 0,
+		(changed & 1) !== 0
+	];
+}
+
 export default function History({ address = "", page = 1 }) {
 
 	const pageSize = 5;
@@ -72,7 +82,11 @@ export default function History({ address = "", page = 1 }) {
 					</thead>
 					<tbody>
 						{loaded.map(game => <tr key={game.id}>
-							<td><fieldset disabled><Cards cards={game.cards} /></fieldset></td>
+							<td>
+								<fieldset disabled>
+									<Cards cards={game.cards} flipped={changedToFlipped(game.change || 0)} />
+								</fieldset>
+							</td>
 							<td className="result">
 								{game.playable ? <a href={`/#play/${address}/${game.id}`}>
 									<button type="button">Resume</button>
