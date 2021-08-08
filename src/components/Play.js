@@ -4,6 +4,8 @@ import ContractForm from "./ContractForm";
 import * as audio from "../util/audio";
 import { Results } from "../util/const";
 import { toBigInt, format } from "../util/util";
+import "../styles/play.scss";
+import Error from "./Error";
 
 const ALL_FLIPPED = Array(5).fill(true);
 const NONE_FLIPPED = Array(5).fill(false);
@@ -169,7 +171,7 @@ export default function Play({ address, resume }) {
 		}
 	}, [contract]);
 
-	return <>
+	return <div className="play-component">
 		<ContractForm address={address} setError={setError} setContract={initContract} />
 		<form onSubmit={submit}>
 			<fieldset disabled={loading || !contract}>
@@ -187,25 +189,23 @@ export default function Play({ address, resume }) {
 						<button type="button" onClick={setMaxBet}>Max</button>
 					</fieldset>
 				</div>
-				<div ref={cardsWrapper} className="row cards-wrapper">
-					<fieldset className="cards" disabled={!playing}>
-						<Cards cards={cards} flipped={flipped} />
-					</fieldset>
-				</div>
+				<fieldset ref={cardsWrapper} className="row play-component-cards" disabled={!playing}>
+					<Cards cards={cards} flipped={flipped} />
+				</fieldset>
 				<div className="row">
-					<button type="submit" id="play-button" className={loading ? "loading" : ""}>
+					<button type="submit" className={`play-component-play-button${loading ? " loading" : ""}`}>
 						{playing ? "Draw" : "Deal"}
 					</button>
 				</div>
 				{result && <div className="row">
-					<div id="result">
+					<div className="play-component-result">
 						<div>{Results[result.index - 1]}</div>
 						<div className="amount">+{format(result.payout)} {unit}</div>
 					</div>
 				</div>}
-				{error && <div className="row error">{error}</div>}
+				{error && <div className="row"><Error error={error} /></div>}
 			</fieldset>
 		</form>
-	</>
+	</div>
 
 }

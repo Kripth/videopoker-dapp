@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import History from "./components/History";
-import Play from "./components/Play";
-import Footer from "./components/Footer";
+import History from "./History";
+import Play from "./Play";
+import Footer from "./Footer";
+import "../styles/app.scss";
 
 export default function App() {
 
@@ -17,14 +18,14 @@ export default function App() {
 		return () => window.removeEventListener("hashchange", fn);
 	});
 
-	return <>
-		<div id="title">videopoker-dapp</div>
-		<div className="app-component">
+	return <div className="app-component">
+		<div className="app-component-title">videopoker-dapp</div>
+		<div className="app-component-content">
 			{page[0] === "history" ?
 				<History address={page[1]} page={page[2]} /> :
 				<Play address={page[1]} resume={page[2]} />}
 		</div>
 		<Footer address={page[1]} />
-	</>
+	</div>
 
 }

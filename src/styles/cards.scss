@@ -1,0 +1,115 @@
+@import "./base";
+
+.cards-component {
+
+	width: 100%;
+	display: flex;
+
+	.card {
+
+		position: relative;
+		width: 100%;
+		font-size: 2.5rem;
+		letter-spacing: 0;
+		user-select: none;
+
+		input {
+			opacity: 0;
+			width: 0;
+			height: 0;
+			display: none;
+		}
+
+		input + label {
+			position: relative;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: #fefefe;
+			border: .125rem solid #e4e4e4;
+			border-radius: 1rem;
+			border-bottom-width: .25rem;
+			width: 100%;
+			padding: calc(70% - .375em) 0;
+			transition: transform .1s ease-in-out;
+
+			&.hearts, &.diamonds {
+				color: #ff6464;
+			}
+
+			&.clubs, &.spades {
+				color: #515262;
+			}
+
+			.value {
+				font-weight: bold;
+				line-height: 0;
+			}
+
+			.suit {
+				display: inline-block;
+				width: .75em;
+				height: .75em;
+				margin-left: .25em;
+			}
+
+			&.hearts .suit {
+				background: url(../assets/suits/hearts.svg);
+				background-size: 100%;
+			}
+
+			&.diamonds .suit {
+				background: url(../assets/suits/diamonds.svg);
+				background-size: 100%;
+			}
+
+			&.clubs .suit {
+				background: url(../assets/suits/clubs.svg);
+				background-size: 100%;
+			}
+
+			&.spades .suit {
+				background: url(../assets/suits/spades.svg);
+				background-size: 100%;
+			}
+		}
+
+		input:not(:disabled):checked + label {
+			transform: translateY(-1.5rem);
+
+			&::after {
+				content: "HOLD";
+				position: absolute;
+				bottom: -1.75rem;
+				left: 0;
+				right: 0;
+				text-align: center;
+				font-size: 1rem;
+				font-weight: bold;
+				line-height: 1rem;
+				color: #bababa;
+			}
+		}
+
+		&.flipped label {
+			background: #fafafa;
+			.value, .suit {
+				opacity: 0;
+			}
+		}
+
+		& + .card {
+			margin-left: .25em;
+		}
+
+	}
+
+	@media screen and (max-width: $mobile) {
+
+		.card {
+			font-size: 150%;
+		}
+
+	}
+
+}

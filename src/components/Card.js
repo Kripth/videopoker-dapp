@@ -1,27 +1,18 @@
 import { card } from "../util/audio";
-
-const JACK = 10;
-const QUEEN = 11;
-const KING = 12;
-const ACE = 13;
+import { Suit } from "../util/const";
 
 const values = {
-	[JACK]: "J",
-	[QUEEN]: "Q",
-	[KING]: "K",
-	[ACE]: "A"
+	"10": "J",
+	"11": "Q",
+	"12": "K",
+	"13": "A"
 };
 
-const HEARTS = 0b000000;
-const DIAMONDS = 0b010000;
-const CLUBS = 0b100000;
-const SPADES = 0b110000;
-
 const classNames = {
-	[HEARTS]: "hearts",
-	[DIAMONDS]: "diamonds",
-	[CLUBS]: "clubs",
-	[SPADES]: "spades",
+	[Suit.hearts]: "hearts",
+	[Suit.diamonds]: "diamonds",
+	[Suit.clubs]: "clubs",
+	[Suit.spades]: "spades",
 };
 
 export default function Card({index, value, flipped = false}){

@@ -3,6 +3,7 @@ import Cards from "./Cards";
 import ContractForm from "./ContractForm";
 import { Results } from "../util/const";
 import { format } from "../util/util";
+import "../styles/history.scss";
 
 function changedToFlipped(changed) {
 	return [
@@ -60,7 +61,7 @@ export default function History({ address = "", page = 1 }) {
 		setContract(contract);
 	}
 
-	return <>
+	return <div className="history-component">
 		<ContractForm address={address} setError={console.warn} setContract={initContract} />
 		<div className="row">
 			<label id="input-order" className="label">Order by</label>
@@ -73,7 +74,7 @@ export default function History({ address = "", page = 1 }) {
 		</div>
 		{loaded && <>
 			<div className="row">
-				<table className="history">
+				<table className="history-component-table">
 					<thead>
 						<tr>
 							<th>Cards</th>
@@ -99,14 +100,14 @@ export default function History({ address = "", page = 1 }) {
 					</tbody>
 				</table>
 			</div>
-			<div className="row history-footer">
+			<div className="row history-component-footer">
 				<span>Page {page} of {pages}</span>
 				<div style={{flexGrow: 1}} />
 				<Page enabled={page > 1 && pages > 1} href={`#history/${address}/${page - 1}`}>Previous</Page>
 				<Page enabled={page < pages} href={`#history/${address}/${+page + 1}`}>Next</Page>
 			</div>
 		</>}
-	</>
+	</div>
 
 }
 

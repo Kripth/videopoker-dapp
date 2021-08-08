@@ -1,0 +1,42 @@
+@import "./base";
+
+.history-component {
+
+	.history-component-table {
+
+		width: 100%;
+
+		td {
+			padding-top: .5rem;
+		}
+
+		.cards-component .card {
+			font-size: 1.75rem;
+		}
+
+		.result {
+			font-size: 1.25rem;
+			font-weight: bold;
+			text-align: center;
+			width: 14rem;
+		}
+
+	}
+
+	.history-component-footer {
+
+		button {
+			min-width: 7rem;
+		}
+
+		.nav + .nav {
+			margin-left: .5rem;
+		}
+
+	}
+
+	@media screen and (max-width: $mobile) {
+
+	}
+
+}

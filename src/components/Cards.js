@@ -1,4 +1,5 @@
 import Card from "./Card";
+import "../styles/cards.scss";
 
 /**
  * @param {number} cards
@@ -12,7 +13,7 @@ export function parse(cards) {
 }
 
 export default function Cards({ cards, flipped = [] }) {
-	return <div className="cards">
+	return <div className="cards-component">
 		{parse(cards).map((value, i) => <Card key={i} index={i} value={value} flipped={flipped[i]} />)}
 	</div>
 }
