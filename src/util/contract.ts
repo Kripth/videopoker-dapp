@@ -1,6 +1,6 @@
 import Web3 from "web3";
 import { Contract as Web3Contract, EventData } from "web3-eth-contract";
-import json from "../contracts/Videopoker.json";
+import { abi } from "../contracts/Videopoker.json";
 
 interface Game {
 	id: bigint;
@@ -155,7 +155,7 @@ export async function createContract(contractAddress: string) {
 		const [ address ] = await eth.request({ method: "eth_requestAccounts" });
 		const web3 = new Web3(eth);
 		// @ts-ignore
-		const contract = new web3.eth.Contract(json, contractAddress);
+		const contract = new web3.eth.Contract(abi, contractAddress);
 		return new Contract(web3, address, contract);
 	} else {
 		throw new Error("Could not detect wallet extension");
