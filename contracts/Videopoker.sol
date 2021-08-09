@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./VideopokerLogic.sol";
 
-abstract contract Videopoker is VideopokerLogic {
+abstract contract Videopoker is Ownable, VideopokerLogic {
 
 	uint private constant MASK_BET_0 = 1 << 249;
 	uint private constant MASK_BET_1 = 1 << 250;
@@ -35,25 +36,11 @@ abstract contract Videopoker is VideopokerLogic {
 
 	event End(uint indexed gameId, uint cards, uint result, uint payout);
 
-	address private immutable owner = msg.sender;
-
 	uint private min = 10000000000;
 	uint private risk = 800;
 
 	mapping(uint => Game) internal games;
 	mapping(address => uint[]) private history;
-
-	function deposit() public payable {}
-
-	function withdraw(uint amount) public {
-		require(msg.sender == owner);
-		payable(msg.sender).transfer(amount);
-	}
-
-	function kill() public {
-		require(msg.sender == owner);
-		selfdestruct(payable(owner));
-	}
 
 	function getGame(uint gameId) public view returns (Game memory) {
 		return games[gameId];
@@ -71,8 +58,17 @@ abstract contract Videopoker is VideopokerLogic {
 		return address(this).balance / risk;
 	}
 
-	function setRisk(uint _risk) public {
-		require(msg.sender == owner);
+	function deposit() public payable {}
+
+	function withdraw(uint amount) public onlyOwner {
+		payable(owner()).transfer(amount);
+	}
+
+	function kill() public onlyOwner {
+		selfdestruct(payable(owner()));
+	}
+
+	function setRisk(uint _risk) public onlyOwner {
 		risk = _risk;
 	}
 
