@@ -35,3 +35,13 @@ export function parse(cards: number): Card[] {
 	}
 	return ret;
 }
+
+export function changedToFlipped(changed: number) {
+	return [
+		(changed & 16) !== 0,
+		(changed & 8) !== 0,
+		(changed & 4) !== 0,
+		(changed & 2) !== 0,
+		(changed & 1) !== 0
+	];
+}

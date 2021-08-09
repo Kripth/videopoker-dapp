@@ -21,6 +21,10 @@
 				font-weight: bold;
 				text-align: center;
 				width: 14rem;
+
+				.amount {
+					color: #58a700;
+				}
 			}
 
 		}
@@ -38,13 +42,20 @@
 		}
 
 		button {
-			min-width: 7rem;
+			font-size: 2rem;
+			min-width: 4rem;
 		}
 
 		.nav + .nav {
 			margin-left: .5rem;
 		}
 
+	}
+
+	.history-component-empty {
+		margin-top: 1.5rem;
+		text-align: center;
+		font-size: 1.25rem;
 	}
 
 	@media screen and (max-width: $mobile) {
@@ -68,14 +79,6 @@
 		.history-component-footer {
 
 			flex-direction: row;
-
-			button {
-				min-width: 7rem;
-			}
-
-			.nav + .nav {
-				margin-left: .5rem;
-			}
 
 		}
 
