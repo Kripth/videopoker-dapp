@@ -1,19 +1,10 @@
 import { useEffect, useState } from "react";
 import Cards from "./Cards";
 import ContractForm from "./ContractForm";
+import { changedToFlipped } from "../util/cards";
 import { Results } from "../util/const";
 import { formatDate, formatNumber } from "../util/format";
 import "../styles/history.scss";
-
-function changedToFlipped(changed) {
-	return [
-		(changed & 16) !== 0,
-		(changed & 8) !== 0,
-		(changed & 4) !== 0,
-		(changed & 2) !== 0,
-		(changed & 1) !== 0
-	];
-}
 
 export default function History({ address = "", page = 1 }) {
 
@@ -80,7 +71,7 @@ export default function History({ address = "", page = 1 }) {
 				</select>
 			</div>
 		</div>
-		{loaded && <>
+		{loaded && (loaded.length ? <>
 			<div className="row">
 				<div style={{width: "100%"}}>
 					{loaded.map(game => <div key={game.id} className="history-component-game">
@@ -90,11 +81,11 @@ export default function History({ address = "", page = 1 }) {
 								<Cards cards={game.cards} flipped={changedToFlipped(game.change || 0)} />
 							</fieldset>
 							<div className="result">
-								{game.playable ? <a href={`/#play/${address}/${game.id}`}>
+								{game.playable || game.change > 0 ? <a href={`/#play/${address}/${game.id}`}>
 									<button type="button">Resume</button>
 								</a> : game.result ? <>
 									<div>{Results[game.result - 1]}</div>
-									<div>{formatNumber(game.payout, 8)} {unit}</div>
+									<div className="amount">{formatNumber(game.payout, 8)} {unit}</div>
 								</> : ""}
 							</div>
 						</div>
@@ -104,10 +95,10 @@ export default function History({ address = "", page = 1 }) {
 			<div className="row history-component-footer">
 				<span>Page {page} of {pages}</span>
 				<div className="spacer" />
-				<Page enabled={page > 1 && pages > 1} href={`#history/${address}/${page - 1}`}>Previous</Page>
-				<Page enabled={page < pages} href={`#history/${address}/${+page + 1}`}>Next</Page>
+				<Page enabled={page > 1 && pages > 1} href={`#history/${address}/${page - 1}`}>&lsaquo;</Page>
+				<Page enabled={page < pages} href={`#history/${address}/${+page + 1}`}>&rsaquo;</Page>
 			</div>
-		</>}
+		</> : <div className="history-component-empty">You haven't played any games yet</div>)}
 	</div>
 
 }

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Cards from "./Cards";
 import ContractForm from "./ContractForm";
 import * as audio from "../util/audio";
+import { changedToFlipped } from "../util/cards";
 import { Results } from "../util/const";
 import { toBigInt, formatNumber } from "../util/format";
 import "../styles/play.scss";
@@ -20,9 +21,11 @@ export default function Play({ address, resume }) {
 	const bet = useRef();
 	const cardsWrapper = useRef();
 
+	const [ active, setActive ] = useState(true);
+
 	const [ contract, setContract ] = useState(null);
 
-	const [ playing, setPlaying ] = useState(false);
+	const [ playing, setPlaying ] = useState(null);
 	const [ loading, setLoading ] = useState(false);
 
 	const [ unit, setUnit ] = useState("");
@@ -33,6 +36,20 @@ export default function Play({ address, resume }) {
 
 	const [ result, setResult ] = useState(null);
 	const [ error, setError ] = useState(null);
+
+	const [ id ] = useState(Math.random());
+
+	useEffect(() => {
+		return () => setActive(false);
+	}, []);
+
+	async function ifActive(promise) {
+		await promise;
+		if(!active) {
+			throw new Error("Component is no longer active");
+		}
+		return promise;
+	}
 
 	function updateImpl(contract) {
 		return Promise.all([
@@ -51,8 +68,8 @@ export default function Play({ address, resume }) {
 
 	async function initContract(contract, info) {
 		if(contract) {
-			await updateImpl(contract);
-			const { unit, coingecko } = info;
+			await ifActive(updateImpl(contract));
+			const { unit } = info;
 			setUnit(unit || "");
 			//TODO convert prices with coingecko API
 			// calculate optimal bet
@@ -64,13 +81,23 @@ export default function Play({ address, resume }) {
 			window.location.hash = `#play/${info.address}`;
 			// resume game
 			if(resume) {
-				const game = await contract.getGame(resume);
-				if(game.playable) {
-					contract.gameId = game.id;
+				const game = await ifActive(contract.getGame(resume));
+				const change = game.change > 0;
+				if(game.playable || change) {
 					bet.current.value = formatNumber(game.bet);
 					setCards(game.cards);
-					setFlipped(NONE_FLIPPED);
-					setPlaying(true);
+					setPlaying(game.id);
+					if(change) {
+						setFlipped(changedToFlipped(game.change));
+						setLoading(true); // mark game as started
+						if(!game.finished) {
+							handleStart(game.bet, contract.startEvent(game.id));
+						} else {
+							handleEnd(contract.endEvent(game.id));
+						}
+					} else {
+						setFlipped(NONE_FLIPPED);
+					}
 				}
 			}
 		} else {
@@ -92,7 +119,7 @@ export default function Play({ address, resume }) {
 
 	async function start(data) {
 		const bet = toBigInt(data.get("bet"));
-		await update();
+		await ifActive(update());
 		if(bet > contract.max) {
 			throw new Error("Bet too high");
 		} else if(bet < contract.min) {
@@ -103,20 +130,27 @@ export default function Play({ address, resume }) {
 			const previouslyFlipped = flipped;
 			setFlipped(ALL_FLIPPED);
 			setResult(null);
-			const { cards } = await contract.start(bet).finally(() => {
-				// restore to previous game in case of cancel/fail
-				setFlipped(previouslyFlipped);
-			});
-			// make sure no cards are selected
-			for(const input of cardsWrapper.current.querySelectorAll(":checked")) {
-				input.checked = false;
-			}
-			setCards(cards);
-			setFlipped(NONE_FLIPPED);
-			setBalance(balance - bet);
-			setPlaying(true);
-			audio.draw();
+			await handleStart(bet, contract.start(bet).finally(() => {
+				if(active) {
+					// restore to previous game in case of cancel/fail
+					setFlipped(previouslyFlipped);
+				}
+			}));
 		}
+	}
+
+	async function handleStart(bet, promise) {
+		const { gameId, cards } = await ifActive(promise);
+		// make sure no cards are selected
+		for(const input of cardsWrapper.current.querySelectorAll(":checked")) {
+			input.checked = false;
+		}
+		setCards(cards);
+		setFlipped(NONE_FLIPPED);
+		setBalance(balance - bet);
+		setPlaying(gameId);
+		setLoading(false);
+		audio.draw();
 	}
 
 	async function end(data) {
@@ -129,10 +163,14 @@ export default function Play({ address, resume }) {
 			}
 		}
 		setFlipped(flipped);
-		const { cards, result, payout } = await contract.end(replace).finally(() => {
+		await handleEnd(contract.end(playing, replace).finally(() => {
 			// all cards must be visible again when the transaction ends, is cancelled or fails
 			setFlipped(NONE_FLIPPED);
-		});
+		}));
+	}
+
+	async function handleEnd(promise) {
+		const { cards, result, payout } = await ifActive(promise);
 		const index = +result;
 		if(index) {
 			if(payout > 0) {
@@ -147,7 +185,8 @@ export default function Play({ address, resume }) {
 		}
 		setCards(Number(BigInt(cards) & 68719476735n)); //FIXME fix event in solidity
 		setFlipped(NONE_FLIPPED);
-		setPlaying(false);
+		setPlaying(null);
+		setLoading(false);
 	}
 
 	async function submit(event) {
@@ -157,11 +196,14 @@ export default function Play({ address, resume }) {
 		try {
 			await (playing ? end : start)(new FormData(event.target));
 		} catch(e) {
-			//FIXME improve error message for contract errors
-			setError(e.message);
-			audio.error();
+			if(active) {
+				setError(e.message);
+				audio.error();
+				setLoading(false);
+			} else {
+				console.warn("Error thrown on inactive component", e);
+			}
 		}
-		setLoading(false);
 	}
 
 	useEffect(() => {
@@ -183,7 +225,7 @@ export default function Play({ address, resume }) {
 				</div>
 				<div className="row">
 					<label htmlFor="input-bet" className="label">Bet</label>
-					<fieldset className="value group" disabled={playing}>
+					<fieldset className="value group" disabled={!!playing}>
 						<input ref={bet} id="input-bet" name="bet" spellCheck={false} />
 						<button type="button" onClick={setMinBet}>Min</button>
 						<button type="button" onClick={setMaxBet}>Max</button>
