@@ -29,7 +29,7 @@ contract VideopokerLogic {
 	uint private constant STRAIGHT_FLUSH = 8;
 	uint private constant ROYAL_FLUSH = 9;
 
-	function win(uint bet, uint cards) internal pure returns (uint, uint) {
+	function win(uint cards) internal pure returns (uint) {
 		// count cards
 		// count is initialized using the first card without doing the `while` check
 		uint count = 1 << ((cards & 15) - 1);
@@ -44,20 +44,20 @@ contract VideopokerLogic {
 				|| count == MASK_STRAIGHT_4 || count == MASK_STRAIGHT_5 || count == MASK_STRAIGHT_6
 				|| count == MASK_STRAIGHT_7 || count == MASK_STRAIGHT_8 || count == MASK_STRAIGHT_9) {
 				if(isFlush(cards)) {
-					return (STRAIGHT_FLUSH, bet * 50);
+					return STRAIGHT_FLUSH;
 				} else {
-					return (STRAIGHT, bet * 4);
+					return STRAIGHT;
 				}
 			} else if(count == MASK_STRAIGHT_HIGH) {
 				// treat royal as a special case
 				if(isFlush(cards)) {
-					return (ROYAL_FLUSH, bet * 250);
+					return ROYAL_FLUSH;
 				} else {
-					return (STRAIGHT, bet * 4);
+					return STRAIGHT;
 				}
 			} else if(isFlush(cards)) {
 				// can only be a flush if a.length is 5
-				return (FLUSH, bet * 6);
+				return FLUSH;
 			}
 		} else {
 			// count how many different combinations of numbers there are
@@ -67,22 +67,22 @@ contract VideopokerLogic {
 				// there are only two unique numbers
 				// must be whether a four of a kind or a full house
 				if(count > COUNT4) {
-					return (FOUR_OF_A_KIND, bet * 25);
+					return FOUR_OF_A_KIND;
 				} else {
-					return (FULL_HOUSE, bet * 9);
+					return FULL_HOUSE;
 				}
 			} else if(count > COUNT3) {
 				// three of a kind
-				return (THREE_OF_A_KIND, bet * 3);
+				return THREE_OF_A_KIND;
 			} else if(uniqueNumbers == 3) {
 				// two pair
-				return (TWO_PAIR, bet * 2);
+				return TWO_PAIR;
 			} else if((count & MASK_JACKS_OR_BETTER) != 0) {
 				// jacks or better
-				return (JACKS_OR_BETTER, bet);
+				return JACKS_OR_BETTER;
 			}
 		}
-		return (0, 0);
+		return 0;
 	}
 
 	function offset(uint count, uint ioffset) private pure returns (uint) {

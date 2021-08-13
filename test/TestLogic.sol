@@ -40,8 +40,7 @@ contract TestLogic is VideopokerLogic {
 	}
 
 	function test(uint cards, uint expectedResult) private {
-		uint result = 0;
-		(result, ) = win(0, cards);
+		uint result = win(cards);
 		Assert.equal(result, expectedResult, "");
 	}
 

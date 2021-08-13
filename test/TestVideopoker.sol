@@ -71,14 +71,14 @@ contract TestVideopoker is Videopoker {
 	}
 
 	function getResult(uint gameId) private returns (uint) {
-		return (getGame(gameId).bet & 13569385457497991651199724805705614201555076328004753598373935625927319879680) >> 249;
+		return getGame(gameId).result;
 	}
 
 	function testNormalGame() public {
 		uint gameId = nextGameId();
 		uint cards = deck(ACE | HEARTS, TWO | HEARTS, THREE | SPADES, FOUR | CLUBS, FIVE | CLUBS);
 		randomness = random(ACE | HEARTS, TWO | HEARTS, THREE | SPADES, FOUR | CLUBS, FIVE | CLUBS);
-		games[gameId] = Game(getMinBet(), msg.sender, 0, 0);
+		games[gameId] = Game(getMinBet(), msg.sender, 0, 0, 0, 0, 0);
 		prepareRandomnessStart(gameId);
 		Assert.equal(getGame(gameId).cards, cards, "Generated cards are different from expected");
 		end(gameId, 0);
@@ -89,7 +89,7 @@ contract TestVideopoker is Videopoker {
 		uint gameId = nextGameId();
 		uint cards = deck(ACE | HEARTS, TWO | HEARTS, THREE | SPADES, SEVEN | CLUBS, SIX | CLUBS);
 		randomness = random(ACE | HEARTS, ACE | HEARTS, 62, TWO | HEARTS, THREE | SPADES, SEVEN | CLUBS, SIX | CLUBS);
-		games[gameId] = Game(getMinBet(), msg.sender, 0, 0);
+		games[gameId] = Game(getMinBet(), msg.sender, 0, 0, 0, 0, 0);
 		prepareRandomnessStart(gameId);
 		Assert.equal(getGame(gameId).cards, cards, "Generated cards are different from expected");
 		cards = deck(ACE | HEARTS, TWO | HEARTS, THREE | SPADES, FOUR | CLUBS, FIVE | CLUBS);
