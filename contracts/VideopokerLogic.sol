@@ -32,12 +32,12 @@ contract VideopokerLogic {
 	function win(uint cards) internal pure returns (uint) {
 		// count cards
 		// count is initialized using the first card without doing the `while` check
-		uint count = 1 << ((cards & 15) - 1);
+		uint count = 1 << (cards & 15);
 		// other cards need to perform the offset check
-		count |= offset(count, 1 << (((cards & 960) - 1) >> 6));
-		count |= offset(count, 1 << (((cards & 61440) - 1) >> 12));
-		count |= offset(count, 1 << (((cards & 3932160) - 1) >> 18));
-		count |= offset(count, 1 << (((cards & 251658240) - 1) >> 24));
+		count |= offset(count, 1 << ((cards & 960) >> 6));
+		count |= offset(count, 1 << ((cards & 61440) >> 12));
+		count |= offset(count, 1 << ((cards & 3932160) >> 18));
+		count |= offset(count, 1 << ((cards & 251658240) >> 24));
 		if(count <= COUNT2) {
 			// all cards have different values, no need to count unique values
 			if(count == MASK_STRAIGHT_A || count == MASK_STRAIGHT_2 || count == MASK_STRAIGHT_3

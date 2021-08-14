@@ -11,9 +11,15 @@ abstract contract Videopoker is Ownable, VideopokerLogic {
 	uint8 private constant STATE_AWAITING_RANDOMNESS_AT_END = 2;
 	uint8 private constant STATE_ENDED = 3;
 
+	uint private constant MASK_CARD_0 = ~uint(63);
+	uint private constant MASK_CARD_1 = ~uint(63 << 6);
+	uint private constant MASK_CARD_2 = ~uint(63 << 12);
+	uint private constant MASK_CARD_3 = ~uint(63 << 18);
+	uint private constant MASK_CARD_4 = ~uint(63 << 24);
+
 	struct DeckBuilder {
 		uint256 random;
-		uint cards;
+		uint deck;
 	}
 
 	struct Game {
@@ -125,7 +131,7 @@ abstract contract Videopoker is Ownable, VideopokerLogic {
 	}
 
 	function endImpl(uint gameId, uint cards, Game storage game) private {
-		// change state before sending
+		// change state before transfers
 		game.state = STATE_ENDED;
 		// check whether the player has won
 		uint result = win(cards);
@@ -152,93 +158,63 @@ abstract contract Videopoker is Ownable, VideopokerLogic {
 
 	function handleRandomnessStart(uint gameId, uint256 randomness) internal {
 		Game storage game = games[gameId];
-		DeckBuilder memory builder = DeckBuilder(randomness, 0);
-		nextCard(builder, 0);
-		nextCard(builder, 6);
-		nextCard(builder, 12);
-		nextCard(builder, 18);
-		nextCard(builder, 24);
-		// store for change/check
-		game.cards = uint32(builder.cards);
+		// pick cards from random number
+		DeckBuilder memory builder = DeckBuilder(randomness, 16141147358858633216);
+		uint cards = nextCard(builder) |
+			(nextCard(builder) << 6) |
+			(nextCard(builder) << 12) |
+			(nextCard(builder) << 18) |
+			(nextCard(builder) << 24);
+		game.cards = uint32(cards);
 		// update state
 		game.state = STATE_STARTED;
 		// event for frontend
-		emit Start(gameId, builder.cards);
+		emit Start(gameId, cards);
 	}
 
 	function handleRandomnessEnd(uint gameId, uint256 randomness) internal {
 		Game storage game = games[gameId];
+		// rebuild deck from current cards
+		uint cards = game.cards;
+		uint deck = 16141147358858633216 |
+			(1 << (cards & 63)) |
+			(1 << ((cards & 4032) >> 6)) |
+			(1 << ((cards & 258048) >> 12)) |
+			(1 << ((cards & 16515072) >> 18)) |
+			(1 << ((cards & 1056964608) >> 24));
 		// update required cards
 		uint change = game.change;
-		DeckBuilder memory builder = DeckBuilder(randomness, game.cards);
+		DeckBuilder memory builder = DeckBuilder(randomness, deck);
 		if((change & 1) != 0) {
-			changeCard(builder, 0);
+			cards = (cards & MASK_CARD_0) | nextCard(builder);
 		}
 		if((change & 2) != 0) {
-			changeCard(builder, 6);
+			cards = (cards & MASK_CARD_1) | (nextCard(builder) << 6);
 		}
 		if((change & 4) != 0) {
-			changeCard(builder, 12);
+			cards = (cards & MASK_CARD_2) | (nextCard(builder) << 12);
 		}
 		if((change & 8) != 0) {
-			changeCard(builder, 18);
+			cards = (cards & MASK_CARD_3) | (nextCard(builder) << 18);
 		}
 		if((change & 16) != 0) {
-			changeCard(builder, 24);
+			cards = (cards & MASK_CARD_4) | (nextCard(builder) << 24);
 		}
 		// cards are updated for statistics
-		uint cards = builder.cards & 68719476735;
 		game.cards = uint32(cards);
 		// check result
 		endImpl(gameId, cards, game);
 	}
 
-	function nextCard(DeckBuilder memory builder, uint position) internal pure {
+	function nextCard(DeckBuilder memory builder) internal pure returns (uint) {
 		do {
-			uint card = builder.random & 63; // 0b111111;
+			uint card = builder.random & 63;
+			uint mask = 1 << card;
 			builder.random >>= 6;
-			if((card & 15) < 13) {
-				card++;
-				// check whether card has already been dealt
-				if(
-					(builder.cards & 63) != card &&
-					(builder.cards & 4032) != (card << 6) &&
-					(builder.cards & 258048) != (card << 12) &&
-					(builder.cards & 16515072) != (card << 18)
-				) {
-					builder.cards |= card << position;
-					return;
-				}
-			}
-		} while(builder.random > 0);
-		// very low chance of happening
-		revert("Invalid random number");
-	}
-
-	function changeCard(DeckBuilder memory builder, uint position) internal pure {
-		do {
-			uint card = builder.random & 63; // 0b111111;
-			builder.random >>= 6;
-			if((card & 15) < 13) {
-				card++;
-				// check whether card has already been dealt
-				if(
-					(builder.cards & 63) != card &&
-					(builder.cards & 4032) != (card << 6) &&
-					(builder.cards & 258048) != (card << 12) &&
-					(builder.cards & 16515072) != (card << 18) &&
-					(builder.cards & 1056964608) != (card << 24) &&
-					(builder.cards & 67645734912) != (card << 30) &&
-					(builder.cards & 4329327034368) != (card << 36) &&
-					(builder.cards & 277076930199552) != (card << 42) &&
-					(builder.cards & 17732923532771328) != (card << 48)
-				) {
-					// shift the previous card before replacing it
-					uint mask = 63 << position;
-					uint old = builder.cards & mask;
-					builder.cards = (builder.cards & ~mask) | (old << (position + 30)) | (card << position);
-					return;
-				}
+			// check whether card has already been dealt
+			if((builder.deck & mask) == 0) {
+				builder.deck |= mask;
+				return card;
 			}
 		} while(builder.random > 0);
 		// very low chance of happening

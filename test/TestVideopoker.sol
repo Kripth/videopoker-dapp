@@ -7,19 +7,19 @@ import "../contracts/Videopoker.sol";
 
 contract TestVideopoker is Videopoker {
 
-	uint private constant ACE = 13;
-	uint private constant TWO = 1;
-	uint private constant THREE = 2;
-	uint private constant FOUR = 3;
-	uint private constant FIVE = 4;
-	uint private constant SIX = 5;
-	uint private constant SEVEN = 6;
-	uint private constant EIGHT = 7;
-	uint private constant NINE = 8;
-	uint private constant TEN = 9;
-	uint private constant JACK = 10;
-	uint private constant QUEEN = 11;
-	uint private constant KING = 12;
+	uint private constant ACE = 12;
+	uint private constant TWO = 0;
+	uint private constant THREE = 1;
+	uint private constant FOUR = 2;
+	uint private constant FIVE = 3;
+	uint private constant SIX = 4;
+	uint private constant SEVEN = 5;
+	uint private constant EIGHT = 6;
+	uint private constant NINE = 7;
+	uint private constant TEN = 8;
+	uint private constant JACK = 9;
+	uint private constant QUEEN = 10;
+	uint private constant KING = 11;
 
 	uint private constant HEARTS = 0;
 	uint private constant DIAMONDS = 16;
@@ -59,15 +59,15 @@ contract TestVideopoker is Videopoker {
 	}
 
 	function random(uint card0, uint card1, uint card2, uint card3, uint card4) private pure returns (uint) {
-		return deck(card0 - 1, card1 - 1, card2 - 1, card3 - 1, card4 - 1);
+		return deck(card0, card1, card2, card3, card4);
 	}
 
 	function random(uint card0, uint card1, uint card2, uint card3, uint card4, uint card5) private pure returns (uint) {
-		return random(card0, card1, card2, card3, card4) | ((card5 - 1) << 30);
+		return random(card0, card1, card2, card3, card4) | (card5 << 30);
 	}
 
 	function random(uint card0, uint card1, uint card2, uint card3, uint card4, uint card5, uint card6) private pure returns (uint) {
-		return random(card0, card1, card2, card3, card4, card5) | ((card6 - 1) << 36);
+		return random(card0, card1, card2, card3, card4, card5) | (card6 << 36);
 	}
 
 	function getResult(uint gameId) private returns (uint) {
@@ -77,7 +77,7 @@ contract TestVideopoker is Videopoker {
 	function testNormalGame() public {
 		uint gameId = nextGameId();
 		uint cards = deck(ACE | HEARTS, TWO | HEARTS, THREE | SPADES, FOUR | CLUBS, FIVE | CLUBS);
-		randomness = random(ACE | HEARTS, TWO | HEARTS, THREE | SPADES, FOUR | CLUBS, FIVE | CLUBS);
+		randomness = random(FIVE | CLUBS, FOUR | CLUBS, THREE | SPADES, TWO | HEARTS, ACE | HEARTS);
 		games[gameId] = Game(getMinBet(), msg.sender, 0, 0, 0, 0, 0);
 		prepareRandomnessStart(gameId);
 		Assert.equal(getGame(gameId).cards, cards, "Generated cards are different from expected");
@@ -88,7 +88,7 @@ contract TestVideopoker is Videopoker {
 	function testDeckReplacementWithDuplicatesAndInvalid() public {
 		uint gameId = nextGameId();
 		uint cards = deck(ACE | HEARTS, TWO | HEARTS, THREE | SPADES, SEVEN | CLUBS, SIX | CLUBS);
-		randomness = random(ACE | HEARTS, ACE | HEARTS, 62, TWO | HEARTS, THREE | SPADES, SEVEN | CLUBS, SIX | CLUBS);
+		randomness = random(SIX | CLUBS, SEVEN | CLUBS, THREE | SPADES, TWO | HEARTS, 62, ACE | HEARTS, ACE | HEARTS);
 		games[gameId] = Game(getMinBet(), msg.sender, 0, 0, 0, 0, 0);
 		prepareRandomnessStart(gameId);
 		Assert.equal(getGame(gameId).cards, cards, "Generated cards are different from expected");
