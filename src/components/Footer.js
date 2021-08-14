@@ -8,7 +8,8 @@ export default function Footer({ address }) {
 		<div className="links">
 			<a href={ref("play", address)}>Play</a>
 			<a href={ref("history", address, "1")}>History</a>
-			<a href="#howtoplay">How to play</a>
+			<a href={ref("payouts", address)}>Payouts</a>
+			<a href="https://github.com/Kripth/videopoker-dapp/blob/master/README.md" target="_blank" rel="noreferrer">About</a>
 			<a href="https://github.com/Kripth/videopoker-dapp" target="_blank" rel="noreferrer">GitHub</a>
 		</div>
 		<div className="suits">

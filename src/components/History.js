@@ -5,6 +5,7 @@ import { changedToFlipped } from "../util/cards";
 import { Results } from "../util/const";
 import { formatDate, formatNumber } from "../util/format";
 import "../styles/history.scss";
+import "../styles/results.scss";
 
 export default function History({ address = "", page = 1 }) {
 
@@ -37,10 +38,6 @@ export default function History({ address = "", page = 1 }) {
 		setLoaded(loaded);
 	}
 
-	function updateOrder(event) {
-		console.log(event);
-	}
-
 	async function initContract(contract, info) {
 		if(contract) {
 			// load history of played games
@@ -62,16 +59,7 @@ export default function History({ address = "", page = 1 }) {
 
 	return <div className="history-component">
 		<ContractForm address={address} setError={console.warn} setContract={initContract} />
-		<div className="row">
-			<label id="input-order" className="label">Order by</label>
-			<div className="value">
-				<select id="input-order" disabled onChange={updateOrder}>
-					<option value="desc">Newest</option>
-					<option value="asc">Oldest</option>
-				</select>
-			</div>
-		</div>
-		{loaded && (loaded.length ? <>
+		{loaded ? (loaded.length ? <>
 			<div className="row">
 				<div style={{width: "100%"}}>
 					{loaded.map(game => <div key={game.id} className="history-component-game">
@@ -98,7 +86,8 @@ export default function History({ address = "", page = 1 }) {
 				<Page enabled={page > 1 && pages > 1} href={`#history/${address}/${page - 1}`}>&lsaquo;</Page>
 				<Page enabled={page < pages} href={`#history/${address}/${+page + 1}`}>&rsaquo;</Page>
 			</div>
-		</> : <div className="history-component-empty">You haven't played any games yet</div>)}
+		</> : <div className="history-component-empty">You haven't played any games yet</div>) :
+		<div className="history-component-empty">Select a contract to view your playing history</div>}
 	</div>
 
 }

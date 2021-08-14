@@ -1,5 +1,5 @@
 import "../styles/error.scss";
 
-export default function Error({ error }) {
+export default function ErrorMessage({ error }) {
 	return <div className="error-component">{ error }</div>
 }

@@ -1,13 +1,22 @@
 [
 	{
-		"address": "0xd2819163a142b32d21bacea22428c58237d247af",
 		"name": "BSC Testnet",
+		"address": "0x851b7430Fb32E0C1c4Fb42a5ECD6Dbb2A383a7AF",
+		"chainId": "0x61",
 		"unit": "BNB",
 		"coingecko": "binancecoin"
 	},
 	{
-		"address": "0xa65432ed7bf63e0ab54532d478fcac0f5a0dfe4f",
-		"name": "Matic Testnet",
+		"name": "Matic Mumbai Testnet",
+		"address": "0x2942513a1E63061d8EB868fb255E5594127f776f",
+		"chainId": "0x13881",
+		"unit": "MATIC",
+		"coingecko": "matic-network"
+	},
+	{
+		"name": "Matic Mainnet",
+		"address": "0xe3d9229ce06268945533467d191fcd78b8a02125",
+		"chainId": "0x89",
 		"unit": "MATIC",
 		"coingecko": "matic-network"
 	}

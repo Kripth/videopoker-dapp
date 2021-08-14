@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import Cards from "./Cards";
 import ContractForm from "./ContractForm";
+import ErrorMessage from "./ErrorMessage";
+import { getId, setActive, ifActive, isActive } from "../util/activestate";
 import * as audio from "../util/audio";
+import { getLastBet, setLastBet } from "../util/cache";
 import { changedToFlipped } from "../util/cards";
 import { Results } from "../util/const";
 import { toBigInt, formatNumber } from "../util/format";
 import "../styles/play.scss";
-import Error from "./Error";
 
 const ALL_FLIPPED = Array(5).fill(true);
 const NONE_FLIPPED = Array(5).fill(false);
@@ -20,8 +22,6 @@ export default function Play({ address, resume }) {
 
 	const bet = useRef();
 	const cardsWrapper = useRef();
-
-	const [ active, setActive ] = useState(true);
 
 	const [ contract, setContract ] = useState(null);
 
@@ -37,19 +37,12 @@ export default function Play({ address, resume }) {
 	const [ result, setResult ] = useState(null);
 	const [ error, setError ] = useState(null);
 
-	const [ id ] = useState(Math.random());
+	const [ id ] = useState(Math.floor(Math.random() * 100000));
 
 	useEffect(() => {
-		return () => setActive(false);
+		setActive(id, true);
+		return () => setActive(id, false);
 	}, []);
-
-	async function ifActive(promise) {
-		await promise;
-		if(!active) {
-			throw new Error("Component is no longer active");
-		}
-		return promise;
-	}
 
 	function updateImpl(contract) {
 		return Promise.all([
@@ -66,22 +59,26 @@ export default function Play({ address, resume }) {
 		return updateImpl(contract);
 	}
 
+	function getBestBet(contract) {
+		let best = contract.balance / 10n;
+		if(best > contract.max) best = contract.max;
+		else if(best < contract.min) best = contract.min;
+		return best > contract.balance ? contract.balance : best;
+	}
+
 	async function initContract(contract, info) {
 		if(contract) {
-			await ifActive(updateImpl(contract));
+			await ifActive(id, updateImpl(contract));
 			const { unit } = info;
 			setUnit(unit || "");
 			//TODO convert prices with coingecko API
 			// calculate optimal bet
-			let best = contract.balance / 10n;
-			if(best > contract.max) best = contract.max;
-			else if(best < contract.min) best = contract.min;
-			bet.current.value = formatNumber(best, 5);
+			bet.current.value = formatNumber(getLastBet(info.address) || getBestBet(contract));
 			// update hash
 			window.location.hash = `#play/${info.address}`;
 			// resume game
 			if(resume) {
-				const game = await ifActive(contract.getGame(resume));
+				const game = await ifActive(id, contract.getGame(resume));
 				const change = game.change > 0;
 				if(game.playable || change) {
 					bet.current.value = formatNumber(game.bet);
@@ -91,7 +88,7 @@ export default function Play({ address, resume }) {
 						setFlipped(changedToFlipped(game.change));
 						setLoading(true); // mark game as started
 						if(!game.finished) {
-							handleStart(game.bet, contract.startEvent(game.id));
+							handleStart(contract.startEvent(game.id));
 						} else {
 							handleEnd(contract.endEvent(game.id));
 						}
@@ -112,14 +109,14 @@ export default function Play({ address, resume }) {
 	}
 
 	async function setMaxBet() {
-		const [ gas ] = await Promise.all([contract.getGasPrice(), update()]);
-		const balance = contract.balance - gas * 310000n;
+		const [ price ] = await Promise.all([contract.getGasPrice(), update()]);
+		const balance = contract.balance - price * 500000n; // save some for fees
 		bet.current.value = formatNumber(contract.max < balance ? contract.max : balance);
 	}
 
 	async function start(data) {
 		const bet = toBigInt(data.get("bet"));
-		await ifActive(update());
+		await ifActive(id, update());
 		if(bet > contract.max) {
 			throw new Error("Bet too high");
 		} else if(bet < contract.min) {
@@ -130,8 +127,9 @@ export default function Play({ address, resume }) {
 			const previouslyFlipped = flipped;
 			setFlipped(ALL_FLIPPED);
 			setResult(null);
-			await handleStart(bet, contract.start(bet).finally(() => {
-				if(active) {
+			setLastBet(address, bet);
+			await handleStart(contract.start(bet).finally(() => {
+				if(isActive(id)) {
 					// restore to previous game in case of cancel/fail
 					setFlipped(previouslyFlipped);
 				}
@@ -139,17 +137,18 @@ export default function Play({ address, resume }) {
 		}
 	}
 
-	async function handleStart(bet, promise) {
-		const { gameId, cards } = await ifActive(promise);
+	async function handleStart(promise) {
+		const { gameId, cards } = await ifActive(id, promise);
+		console.log(id, isActive(id), gameId, cards);
 		// make sure no cards are selected
 		for(const input of cardsWrapper.current.querySelectorAll(":checked")) {
 			input.checked = false;
 		}
 		setCards(cards);
 		setFlipped(NONE_FLIPPED);
-		setBalance(balance - bet);
 		setPlaying(gameId);
 		setLoading(false);
+		update();
 		audio.draw();
 	}
 
@@ -170,13 +169,9 @@ export default function Play({ address, resume }) {
 	}
 
 	async function handleEnd(promise) {
-		const { cards, result, payout } = await ifActive(promise);
+		const { cards, result, payout } = await ifActive(id, promise);
 		const index = +result;
 		if(index) {
-			if(payout > 0) {
-				// update balance
-				setBalance(balance + BigInt(payout));
-			}
 			setResult({ index, payout });
 			audio.win();
 		} else {
@@ -187,6 +182,7 @@ export default function Play({ address, resume }) {
 		setFlipped(NONE_FLIPPED);
 		setPlaying(null);
 		setLoading(false);
+		update();
 	}
 
 	async function submit(event) {
@@ -196,7 +192,7 @@ export default function Play({ address, resume }) {
 		try {
 			await (playing ? end : start)(new FormData(event.target));
 		} catch(e) {
-			if(active) {
+			if(isActive(id)) {
 				setError(e.message);
 				audio.error();
 				setLoading(false);
@@ -226,7 +222,7 @@ export default function Play({ address, resume }) {
 				<div className="row">
 					<label htmlFor="input-bet" className="label">Bet</label>
 					<fieldset className="value group" disabled={!!playing}>
-						<input ref={bet} id="input-bet" name="bet" spellCheck={false} />
+						<input ref={bet} id="input-bet" autoComplete="off" name="bet" spellCheck={false} />
 						<button type="button" onClick={setMinBet}>Min</button>
 						<button type="button" onClick={setMaxBet}>Max</button>
 					</fieldset>
@@ -245,7 +241,7 @@ export default function Play({ address, resume }) {
 						<div className="amount">+{formatNumber(result.payout)} {unit}</div>
 					</div>
 				</div>}
-				{error && <div className="row"><Error error={error} /></div>}
+				{error && <div className="row"><ErrorMessage error={error} /></div>}
 			</fieldset>
 		</form>
 	</div>

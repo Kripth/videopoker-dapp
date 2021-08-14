@@ -23,8 +23,8 @@ export function toBigInt(value: string): bigint {
  * Formats an integer used by the network into a decimal representation without
  * losing precision.
  */
-export function formatNumber(amount: string | bigint, digits = 18): string {
-	const formatEnd = (str: string) => str.slice(0, digits).replace(/0+$/, "");
+export function formatNumber(amount: string | bigint): string {
+	const formatEnd = (str: string) => str.replace(/0+$/, "");
 	const str = amount.toString();
 	if(str === "0") {
 		return str;
