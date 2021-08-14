@@ -4,14 +4,19 @@ import { abi } from "../contracts/Videopoker.json";
 
 interface Game {
 	id: bigint;
-	playable: boolean;
 	bet: bigint;
+	date: Date;
+	cards: number;
+	change?: number;
 	result?: number;
 	payout?: bigint;
-	cards: number;
-	finished: boolean;
-	change?: number;
-	date: Date
+	playable: boolean;
+}
+
+interface CreatedEvent {
+	searchId: string;
+	player: string;
+	gameId: bigint;
 }
 
 interface StartEvent {
@@ -24,17 +29,6 @@ interface EndEvent {
 	cards: string;
 	result: string;
 	payout: string;
-}
-
-/**
- * Creates a random number to be used as game id.
- */
-function random(): bigint {
-	let value = 0n;
-	for(let i=0; i<8; i++) {
-		value |= BigInt(Math.floor(Math.random() * 2147483648)) << BigInt(i * 31);
-	}
-	return value;
 }
 
 export class Contract {
@@ -53,8 +47,8 @@ export class Contract {
 		return this.contract.methods[method](...args).send({from: this.address, value: value.toString()});
 	}
 
-	event<T>(eventName: string, gameId: bigint, callback: (values: T) => any) {
-		const provider = this.contract.events[eventName]({ filter: { gameId }}).on("data", (event: EventData) => {
+	event<T>(eventName: string, filter: any, callback: (values: T) => any) {
+		const provider = this.contract.events[eventName]({ filter }).on("data", (event: EventData) => {
 			callback(event.returnValues as T);
 			provider.off("data");
 		});
@@ -76,36 +70,32 @@ export class Contract {
 		return BigInt(await this.web3.eth.getGasPrice());
 	}
 
+	async getPayouts() {
+		return (await this.call("getPayouts")).map(BigInt);
+	}
+
 	async getGame(id: bigint | string): Promise<Game> {
 		const game = await this.call("getGame", id);
+		const state = +game.state;
 		const ret = {
 			id,
-			playable: false,
 			bet: BigInt(game.bet),
-			cards: +game.cards,
-			finished: false,
+			cards: Number(game.cards),
 			date: new Date(game.timestamp * 1000)
 		} as Game;
-		if(ret.cards === 0) {
+		if(state === 0) {
 			// awaiting randomness at start
 			ret.change = 0b11111;
+		} else if(state === 1) {
+			// game started
+			ret.playable = true;
+		} else if(state === 2) {
+			// awaiting randomness at end
+			ret.change = +game.change;
 		} else {
-			const flag = (ret.bet & (0b11n << 254n)) >> 254n;
-			if(flag === 0n) {
-				// game started but not finished
-				ret.playable = true;
-				ret.bet &= (1n << 249n) - 1n;
-			} else if(flag === 1n) {
-				// awaiting randomness at end
-				ret.finished = true;
-				ret.change = Number((ret.bet & (0b11111n << 249n)) >> 249n);
-				ret.bet &= (1n << 249n) - 1n;
-			} else {
-				// ended
-				ret.finished = true;
-				ret.result = Number((ret.bet & (0b11111n << 249n)) >> 249n);
-				ret.payout = ret.bet & ((1n << 249n) - 1n);
-			}
+			// ended
+			ret.result = +game.result;
+			ret.payout = ret.bet;
 		}
 		return ret;
 	}
@@ -115,16 +105,18 @@ export class Contract {
 	}
 
 	start(bet: bigint): Promise<StartEvent> {
-		const gameId = random();
+		const searchId = Math.floor(Math.random() * 2147483648);
 		return new Promise((success, fail) => {
-			this.send("start", bet, gameId).catch(fail);
-			this.startEvent(gameId).then(success);
+			this.send("start", bet, searchId).catch(fail);
+			this.event<CreatedEvent>("Created", { searchId, player: this.address }, ({ gameId }) => {
+				this.startEvent(gameId).then(success);
+			});
 		});
 	}
 
 	startEvent(gameId: bigint): Promise<StartEvent> {
 		return new Promise(success => {
-			this.event<StartEvent>("Start", gameId, success);
+			this.event<StartEvent>("Start", { gameId }, success);
 		});
 	}
 
@@ -137,7 +129,7 @@ export class Contract {
 
 	endEvent(gameId: bigint): Promise<EndEvent> {
 		return new Promise(success => {
-			this.event<EndEvent>("End", gameId, success);
+			this.event<EndEvent>("End", { gameId }, success);
 		});
 	}
 
@@ -148,10 +140,13 @@ export class Contract {
  * @param {string} contractAddress
  * @returns {Promise<Contract>}
  */
-export async function createContract(contractAddress: string) {
+export async function createContract(contractAddress: string, chainId?: string) {
 	// @ts-ignore
 	const eth = window.ethereum;
 	if(eth) {
+		if(chainId) {
+			await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId }]});
+		}
 		const [ address ] = await eth.request({ method: "eth_requestAccounts" });
 		const web3 = new Web3(eth);
 		// @ts-ignore

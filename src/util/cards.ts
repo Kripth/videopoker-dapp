@@ -1,4 +1,4 @@
-import { Suit } from "./const";
+import { Value, Suit } from "./const";
 
 export class Card {
 
@@ -6,11 +6,11 @@ export class Card {
 
 	get value(): string {
 		switch(this._value) {
-			case 10: return "J";
-			case 11: return "Q";
-			case 12: return "K";
-			case 13: return "A";
-			default: return (1 + this._value).toString();
+			case Value.jack: return "J";
+			case Value.queen: return "Q";
+			case Value.king: return "K";
+			case Value.ace: return "A";
+			default: return (2 + this._value).toString();
 		}
 	}
 
@@ -26,12 +26,16 @@ export class Card {
 
 }
 
-export function parse(cards: number): Card[] {
+export function parse(cards: number | number[]): Card[] {
+	return (Array.isArray(cards) ? cards : parseImpl(cards))
+		.map(encoded => new Card(encoded & 0b001111, encoded & 0b110000));
+}
+
+function parseImpl(cards: number): number[] {
 	const ret = Array(5);
 	for(let i=0; i<ret.length; i++) {
 		const offset = i * 6;
-		const encoded = (cards & (0b111111 << offset)) >> offset;
-		ret[i] = new Card(encoded & 0b001111, encoded & 0b110000);
+		ret[i] = (cards & (0b111111 << offset)) >> offset;
 	}
 	return ret;
 }

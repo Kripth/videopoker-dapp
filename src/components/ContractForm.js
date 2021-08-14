@@ -9,30 +9,31 @@ export default function ContractForm({ address, setError, setContract }) {
 
 	async function handleCreateContract(address) {
 		try {
-			const contract = window.contract = await createContract(address);
+			// check whether it is a well known contract
+			const info = contracts.find(o => address === o.address) || { address };
+			const contract = window.contract = await createContract(address, info.chainId);
 			// init balances before starting
 			await Promise.all([
 				contract.updateBalance(),
 				contract.updateMin(),
 				contract.updateMax()
 			]);
-			return contract;
+			return [ contract, info ];
 		} catch(e) {
 			setFirst(true);
 			setError(e.message || "Could not load contract");
+			return [];
 		}
 	}
 
-	async function select(arg) {
-		const address = arg.toLowerCase();
+	async function select(address) {
 		setError(null);
 		setContract(null);
 		setLoading(true);
-		const contract = await handleCreateContract(address);
+		const [ contract, info ] = await handleCreateContract(address);
 		if(contract) {
 			setFirst(false);
-			// check whether it is a well known contract
-			const res = setContract(contract, contracts.find(o => address === o.address) || { address });
+			const res = setContract(contract, info);
 			if(res instanceof Promise) {
 				await res;
 			}
@@ -57,7 +58,7 @@ export default function ContractForm({ address, setError, setContract }) {
 	return <form className="row force-margin" onSubmit={submit}>
 		<label htmlFor="input-contract" className="label">Contract</label>
 		<div className="value group">
-			<input id="input-contract" name="address" defaultValue={address || contracts[0].address} spellCheck={false} />
+			<input id="input-contract" autoComplete="off" name="address" defaultValue={address || contracts[0].address} spellCheck={false} />
 			<button type="submit" className={loading ? "loading" : ""} style={{width: "8rem"}}>{first ? "Use" : "Change"}</button>
 		</div>
 	</form>

@@ -1,5 +1,21 @@
 export const WEI = 1000000000000000000n;
 
+export enum Value {
+	two = 0,
+	three,
+	four,
+	five,
+	six,
+	seven,
+	eight,
+	nine,
+	ten,
+	jack,
+	queen,
+	king,
+	ace
+}
+
 export enum Suit {
 	hearts = 0b000000,
 	diamonds = 0b010000,
