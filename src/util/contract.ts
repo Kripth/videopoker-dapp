@@ -13,14 +13,10 @@ interface Game {
 	playable: boolean;
 }
 
-interface CreatedEvent {
-	searchId: string;
-	player: string;
-	gameId: bigint;
-}
-
 interface StartEvent {
 	gameId: string;
+	player: string;
+	searchId: string;
 	cards: string;
 }
 
@@ -105,12 +101,10 @@ export class Contract {
 	}
 
 	start(bet: bigint): Promise<StartEvent> {
-		const searchId = Math.floor(Math.random() * 2147483648);
+		const searchId = Math.floor(Math.random() * 4294967296);
 		return new Promise((success, fail) => {
+			this.event<StartEvent>("Start", { searchId, player: this.address }, success);
 			this.send("start", bet, searchId).catch(fail);
-			this.event<CreatedEvent>("Created", { searchId, player: this.address }, ({ gameId }) => {
-				this.startEvent(gameId).then(success);
-			});
 		});
 	}
 
@@ -122,8 +116,8 @@ export class Contract {
 
 	end(gameId: bigint, replace: number): Promise<EndEvent> {
 		return new Promise((success, fail) => {
-			this.send("end", 0, gameId, replace).catch(fail);
 			this.endEvent(gameId).then(success);
+			this.send("end", 0, gameId, replace).catch(fail);
 		});
 	}
 
@@ -140,12 +134,20 @@ export class Contract {
  * @param {string} contractAddress
  * @returns {Promise<Contract>}
  */
-export async function createContract(contractAddress: string, chainId?: string) {
+export async function createContract(contractAddress: string, chain?: any) {
 	// @ts-ignore
 	const eth = window.ethereum;
 	if(eth) {
-		if(chainId) {
-			await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId }]});
+		if(chain) {
+			try {
+				await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId: chain.chainId }]});
+			} catch(e) {
+				if(e.code === 4902) {
+					await eth.request({ method: "wallet_addEthereumChain", params: [ chain ]});
+				} else {
+					throw e;
+				}
+			}
 		}
 		const [ address ] = await eth.request({ method: "eth_requestAccounts" });
 		const web3 = new Web3(eth);

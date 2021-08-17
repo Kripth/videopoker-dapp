@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Cards from "./Cards";
 import ContractForm from "./ContractForm";
 import ErrorMessage from "./ErrorMessage";
-import { getId, setActive, ifActive, isActive } from "../util/activestate";
+import { setActive, ifActive, isActive } from "../util/activestate";
 import * as audio from "../util/audio";
 import { getLastBet, setLastBet } from "../util/cache";
 import { changedToFlipped } from "../util/cards";
@@ -69,8 +69,7 @@ export default function Play({ address, resume }) {
 	async function initContract(contract, info) {
 		if(contract) {
 			await ifActive(id, updateImpl(contract));
-			const { unit } = info;
-			setUnit(unit || "");
+			setUnit(info.chain?.nativeCurrency.symbol ?? "");
 			//TODO convert prices with coingecko API
 			// calculate optimal bet
 			bet.current.value = formatNumber(getLastBet(info.address) || getBestBet(contract));
@@ -139,7 +138,6 @@ export default function Play({ address, resume }) {
 
 	async function handleStart(promise) {
 		const { gameId, cards } = await ifActive(id, promise);
-		console.log(id, isActive(id), gameId, cards);
 		// make sure no cards are selected
 		for(const input of cardsWrapper.current.querySelectorAll(":checked")) {
 			input.checked = false;

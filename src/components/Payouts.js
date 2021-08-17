@@ -3,7 +3,8 @@ import ContractForm from "./ContractForm";
 import Cards from "./Cards";
 import { getLastBet } from "../util/cache";
 import { Value, Suit, Results } from "../util/const";
-import { formatNumber, toBigInt } from "../util/format";
+import { formatCurrency, formatNumber, toBigInt } from "../util/format";
+import { getPrice } from "../util/priceprovider";
 import "../styles/results.scss";
 
 const combinations = [
@@ -31,12 +32,17 @@ export default function Payouts({ address }) {
 	const [ payouts, setPayouts ] = useState(null);
 	const [ bet, setBet ] = useState(0n);
 	const [ unit, setUnit ] = useState("");
+	const [ price, setPrice ] = useState(null);
 
-	async function initContract(contract, { address, unit } = {}) {
+	async function initContract(contract, { address, chain, coingecko } = {}) {
 		if(contract) {
-			setPayouts(await contract.getPayouts());
+			const promises = [contract.getPayouts().then(setPayouts)];
+			if(coingecko) {
+				promises.push(getPrice(coingecko).then(setPrice))
+			}
+			await promises;
 			setBet(getLastBet(address) || 1000000000000000000n);
-			setUnit(unit || "");
+			setUnit(chain?.nativeCurrency.symbol);
 		} else {
 			setPayouts(null);
 		}
@@ -67,7 +73,8 @@ export default function Payouts({ address }) {
 					<div className="result">
 						<span>{bet - 1n} {payouts[i]}</span>
 						<div>{Results[i]}</div>
-						<span className="amount">{formatNumber(bet * payouts[i])} {unit}</span>
+						<div className="amount">{formatNumber(bet * payouts[i])} {unit}</div>
+						{price && <span className="currency">${formatCurrency(bet * payouts[i], price)}</span>}
 					</div>
 				</div>)}
 			</fieldset>

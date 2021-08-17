@@ -19,11 +19,11 @@ contract VideopokerImplChainlink is Videopoker, VRFConsumerBase {
 		_fee = fee;
 	}
 
-	function prepareRandomnessStart(uint gameId) internal override {
+	function prepareRandomnessStart(uint gameId, Game storage game) internal override {
 		prepareRandomness(gameId | GAME_START);
 	}
 
-	function prepareRandomnessEnd(uint gameId) internal override {
+	function prepareRandomnessEnd(uint gameId, Game storage game) internal override {
 		prepareRandomness(gameId);
 	}
 
@@ -37,9 +37,10 @@ contract VideopokerImplChainlink is Videopoker, VRFConsumerBase {
 		uint gameId = requests[requestId];
 		if(gameId != 0) {
 			if((gameId & GAME_START) == GAME_START) {
-				handleRandomnessStart(gameId & GAME_START_MASK, randomness);
+				gameId &= GAME_START_MASK;
+				handleRandomnessStart(gameId, games[gameId], randomness);
 			} else {
-				handleRandomnessEnd(gameId, randomness);
+				handleRandomnessEnd(gameId, games[gameId], randomness);
 			}
 		}
 	}

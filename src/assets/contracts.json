@@ -1,5 +1,22 @@
 [
 	{
+		"name": "Harmony Testnet",
+		"address": "0x7aF24c3fDb74e75C3c7751629C0C72785FDf3DAA",
+		"chain": {
+			"chainId": "0x6357d2e0",
+			"chainName": "Harmony Testnet",
+			"nativeCurrency": {
+				"name": "ONE",
+				"symbol": "ONE",
+				"decimals": 18
+			},
+			"rpcUrls": ["https://api.s0.b.hmny.io"],
+			"blockExplorerUrls": ["https://explorer.testnet.harmony.one/#/"]
+		},
+		"coingecko": "harmony"
+	},
+	{
+		"search": "bsc-testnet",
 		"name": "BSC Testnet",
 		"address": "0x851b7430Fb32E0C1c4Fb42a5ECD6Dbb2A383a7AF",
 		"chainId": "0x61",

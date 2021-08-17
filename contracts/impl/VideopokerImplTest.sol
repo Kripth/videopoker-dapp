@@ -5,12 +5,12 @@ import "../Videopoker.sol";
 
 contract VideopokerImplTest is Videopoker {
 
-	function prepareRandomnessStart(uint gameId) internal override {
-		handleRandomnessStart(gameId, randomness());
+	function prepareRandomnessStart(uint gameId, Game storage game) internal override {
+		handleRandomnessStart(gameId, game, randomness());
 	}
 
-	function prepareRandomnessEnd(uint gameId) internal override {
-		handleRandomnessEnd(gameId, randomness());
+	function prepareRandomnessEnd(uint gameId, Game storage game) internal override {
+		handleRandomnessEnd(gameId, game, randomness());
 	}
 
 	function randomness() internal view returns (uint256) {
