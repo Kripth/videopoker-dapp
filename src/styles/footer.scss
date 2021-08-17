@@ -11,6 +11,10 @@
 			color: #333;
 			margin: 0 .25rem;
 		}
+
+		& > div + div {
+			margin-top: .5rem;
+		}
 	}
 
 	.suits {

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Cards from "./Cards";
-import ContractForm from "./ContractForm";
 import ErrorMessage from "./ErrorMessage";
+import SelectContract from "./SelectContract";
 import { setActive, ifActive, isActive } from "../util/activestate";
 import * as audio from "../util/audio";
 import { getLastBet, setLastBet } from "../util/cache";
@@ -72,9 +72,9 @@ export default function Play({ address, resume }) {
 			setUnit(info.chain?.nativeCurrency.symbol ?? "");
 			//TODO convert prices with coingecko API
 			// calculate optimal bet
-			bet.current.value = formatNumber(getLastBet(info.address) || getBestBet(contract));
+			bet.current.value = formatNumber(getLastBet(info.alias) || getBestBet(contract));
 			// update hash
-			window.location.hash = `#play/${info.address}`;
+			window.location.hash = `#play/${info.alias}`;
 			// resume game
 			if(resume) {
 				const game = await ifActive(id, contract.getGame(resume));
@@ -208,7 +208,7 @@ export default function Play({ address, resume }) {
 	}, [contract]);
 
 	return <div className="play-component">
-		<ContractForm address={address} setError={setError} setContract={initContract} />
+		<SelectContract address={address} setError={setError} setContract={initContract} />
 		<form onSubmit={submit}>
 			<fieldset disabled={loading || !contract}>
 				<div className="row">

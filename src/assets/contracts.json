@@ -1,6 +1,26 @@
 [
 	{
+		"alias": "harmony",
+		"name": "Harmony",
+		"logo": "https://cryptologos.cc/logos/harmony-one-logo.svg",
+		"address": "",
+		"chain": {
+			"chainId": "0x63564c40",
+			"chainName": "Harmony Mainnet",
+			"nativeCurrency": {
+				"name": "ONE",
+				"symbol": "ONE",
+				"decimals": 18
+			},
+			"rpcUrls": ["https://api.harmony.one"],
+			"blockExplorerUrls": ["https://explorer.harmony.one/#/"]
+		},
+		"coingecko": "harmony"
+	},
+	{
+		"alias": "harmony-testnet",
 		"name": "Harmony Testnet",
+		"logo": "https://cryptologos.cc/logos/harmony-one-logo.svg",
 		"address": "0x7aF24c3fDb74e75C3c7751629C0C72785FDf3DAA",
 		"chain": {
 			"chainId": "0x6357d2e0",
@@ -16,24 +36,28 @@
 		"coingecko": "harmony"
 	},
 	{
-		"search": "bsc-testnet",
+		"alias": "bsc-testnet",
 		"name": "BSC Testnet",
-		"address": "0x851b7430Fb32E0C1c4Fb42a5ECD6Dbb2A383a7AF",
-		"chainId": "0x61",
-		"unit": "BNB",
+		"logo": "https://cryptologos.cc/logos/binance-coin-bnb-logo.svg",
+		"address": "0x4b63C905089D6590eb996615d67D1A397731FC8C",
+		"chain": {
+			"chainId": "0x61",
+			"chainName": "Binance Smart Chain Testnet",
+			"nativeCurrency": {
+				"name": "BNB",
+				"symbol": "BNB",
+				"decimals": 18
+			},
+			"rpcUrls": ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
+			"blockExplorerUrls": ["https://testnet.bscscan.com"]
+		},
 		"coingecko": "binancecoin"
 	},
 	{
 		"name": "Matic Mumbai Testnet",
 		"address": "0x2942513a1E63061d8EB868fb255E5594127f776f",
+		"logo": "https://cryptologos.cc/logos/polygon-matic-logo.svg",
 		"chainId": "0x13881",
-		"unit": "MATIC",
-		"coingecko": "matic-network"
-	},
-	{
-		"name": "Matic Mainnet",
-		"address": "0xe3d9229ce06268945533467d191fcd78b8a02125",
-		"chainId": "0x89",
 		"unit": "MATIC",
 		"coingecko": "matic-network"
 	}

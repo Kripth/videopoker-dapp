@@ -155,6 +155,6 @@ export async function createContract(contractAddress: string, chain?: any) {
 		const contract = new web3.eth.Contract(abi, contractAddress);
 		return new Contract(web3, address, contract);
 	} else {
-		throw new Error("Could not detect wallet extension");
+		throw new Error("Could not detect wallet");
 	}
 }

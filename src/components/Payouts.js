@@ -1,6 +1,6 @@
-import {useRef, useState} from "react";
-import ContractForm from "./ContractForm";
+import { useRef, useState } from "react";
 import Cards from "./Cards";
+import SelectContract from "./SelectContract";
 import { getLastBet } from "../util/cache";
 import { Value, Suit, Results } from "../util/const";
 import { formatCurrency, formatNumber, toBigInt } from "../util/format";
@@ -57,7 +57,7 @@ export default function Payouts({ address }) {
 	}
 
 	return <div>
-		<ContractForm address={address} setError={console.warn} setContract={initContract} />
+		<SelectContract address={address} setError={console.warn} setContract={initContract} />
 		{payouts && <>
 			<div className="row">
 				<label htmlFor="input-bet" className="label">Bet</label>

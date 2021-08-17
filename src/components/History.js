@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Cards from "./Cards";
-import ContractForm from "./ContractForm";
+import SelectContract from "./SelectContract";
 import { changedToFlipped } from "../util/cards";
 import { Results } from "../util/const";
 import { formatDate, formatNumber } from "../util/format";
@@ -48,7 +48,7 @@ export default function History({ address = "", page = 1 }) {
 			setUnit(info.chain?.nativeCurrency.symbol ?? "");
 			await load(contract, page - 1, games);
 			// update hash
-			window.location.hash = `#history/${info.address}/${page}`;
+			window.location.hash = `#history/${info.alias}/${page}`;
 		} else {
 			setLoaded(null);
 			setGames(null);
@@ -58,7 +58,7 @@ export default function History({ address = "", page = 1 }) {
 	}
 
 	return <div className="history-component">
-		<ContractForm address={address} setError={console.warn} setContract={initContract} />
+		<SelectContract address={address} setError={console.warn} setContract={initContract} />
 		{loaded ? (loaded.length ? <>
 			<div className="row">
 				<div style={{width: "100%"}}>
