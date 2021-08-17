@@ -16,7 +16,7 @@ export default function ContractForm({ address, setError, setContract }) {
 		try {
 			// check whether it is a well known contract
 			const info = contracts.find(o => address === o.address) || { address };
-			const contract = window.contract = await createContract(address, info.chainId);
+			const contract = window.contract = await createContract(address, info.chain);
 			// init balances before starting
 			await Promise.all([
 				contract.updateBalance(),

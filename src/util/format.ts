@@ -38,6 +38,10 @@ export function formatNumber(amount: string | bigint): string {
 	}
 }
 
+export function formatCurrency(value: bigint, change: number): string {
+	return (Number(value) / Number(WEI) * change).toFixed(2);
+}
+
 export function formatDate(date: Date): string {
 	const year = date.getFullYear().toString().padStart(4, "0");
 	const month = pad2(date.getMonth() + 1);

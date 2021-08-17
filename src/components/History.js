@@ -45,7 +45,7 @@ export default function History({ address = "", page = 1 }) {
 			const games = (await contract.getGames()).slice().reverse();
 			setGames(games);
 			setPages(Math.ceil(games.length / pageSize));
-			setUnit(info.unit || "");
+			setUnit(info.chain?.nativeCurrency.symbol ?? "");
 			await load(contract, page - 1, games);
 			// update hash
 			window.location.hash = `#history/${info.address}/${page}`;

@@ -69,8 +69,7 @@ export default function Play({ address, resume }) {
 	async function initContract(contract, info) {
 		if(contract) {
 			await ifActive(id, updateImpl(contract));
-			const { unit } = info;
-			setUnit(unit || "");
+			setUnit(info.chain?.nativeCurrency.symbol ?? "");
 			//TODO convert prices with coingecko API
 			// calculate optimal bet
 			bet.current.value = formatNumber(getLastBet(info.address) || getBestBet(contract));

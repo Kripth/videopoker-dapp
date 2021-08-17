@@ -134,12 +134,20 @@ export class Contract {
  * @param {string} contractAddress
  * @returns {Promise<Contract>}
  */
-export async function createContract(contractAddress: string, chainId?: string) {
+export async function createContract(contractAddress: string, chain?: any) {
 	// @ts-ignore
 	const eth = window.ethereum;
 	if(eth) {
-		if(chainId) {
-			await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId }]});
+		if(chain) {
+			try {
+				await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId: chain.chainId }]});
+			} catch(e) {
+				if(e.code === 4902) {
+					await eth.request({ method: "wallet_addEthereumChain", params: [ chain ]});
+				} else {
+					throw e;
+				}
+			}
 		}
 		const [ address ] = await eth.request({ method: "eth_requestAccounts" });
 		const web3 = new Web3(eth);
