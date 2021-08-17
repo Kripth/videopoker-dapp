@@ -32,9 +32,7 @@ abstract contract Videopoker is Ownable, VideopokerLogic {
 		uint8 result;
 	}
 
-	event Created(uint indexed searchId, address indexed player, uint gameId);
-
-	event Start(uint indexed gameId, uint cards);
+	event Start(uint indexed gameId, address indexed player, uint32 indexed searchId, uint cards);
 
 	event End(uint indexed gameId, uint cards, uint result, uint payout);
 
@@ -96,20 +94,18 @@ abstract contract Videopoker is Ownable, VideopokerLogic {
 		payouts = _payouts;
 	}
 
-	function start(uint searchId) external payable {
+	function start(uint32 searchId) external payable {
 		// check whether bet is possible
 		uint bet = msg.value;
 		require(bet <= getMaxBet(), "Bet too high");
 		require(bet >= getMinBet(), "Bet too low");
 		// init
 		uint gameId = ++currentGameId;
-		games[gameId] = Game(bet, msg.sender, uint32(block.timestamp), 0, STATE_AWAITING_RANDOMNESS_AT_START, 0, 0);
+		Game storage game = games[gameId] = Game(bet, msg.sender, uint32(block.timestamp), searchId, STATE_AWAITING_RANDOMNESS_AT_START, 0, 0);
 		// add to history
 		history[msg.sender].push(gameId);
-		// event
-		emit Created(searchId, msg.sender, gameId);
 		// call abstract randomness handler
-		prepareRandomnessStart(gameId);
+		prepareRandomnessStart(gameId, game);
 	}
 
 	function end(uint gameId, uint8 change) public {
@@ -123,7 +119,7 @@ abstract contract Videopoker is Ownable, VideopokerLogic {
 			// need more randomness
 			game.state = STATE_AWAITING_RANDOMNESS_AT_END;
 			game.change = change;
-			prepareRandomnessEnd(gameId);
+			prepareRandomnessEnd(gameId, game);
 		} else {
 			// simply check result
 			endImpl(gameId, game.cards, game);
@@ -152,12 +148,12 @@ abstract contract Videopoker is Ownable, VideopokerLogic {
 		emit End(gameId, cards, result, payout);
 	}
 
-	function prepareRandomnessStart(uint gameId) virtual internal;
+	function prepareRandomnessStart(uint gameId, Game storage game) virtual internal;
 
-	function prepareRandomnessEnd(uint gameId) virtual internal;
+	function prepareRandomnessEnd(uint gameId, Game storage game) virtual internal;
 
-	function handleRandomnessStart(uint gameId, uint256 randomness) internal {
-		Game storage game = games[gameId];
+	function handleRandomnessStart(uint gameId, Game storage game, uint256 randomness) internal {
+		uint32 searchId = game.cards;
 		// pick cards from random number
 		DeckBuilder memory builder = DeckBuilder(randomness, 16141147358858633216);
 		uint cards = nextCard(builder) |
@@ -169,11 +165,10 @@ abstract contract Videopoker is Ownable, VideopokerLogic {
 		// update state
 		game.state = STATE_STARTED;
 		// event for frontend
-		emit Start(gameId, cards);
+		emit Start(gameId, game.player, searchId, cards);
 	}
 
-	function handleRandomnessEnd(uint gameId, uint256 randomness) internal {
-		Game storage game = games[gameId];
+	function handleRandomnessEnd(uint gameId, Game storage game, uint256 randomness) internal {
 		// rebuild deck from current cards
 		uint cards = game.cards;
 		uint deck = 16141147358858633216 |

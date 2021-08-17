@@ -1,5 +1,12 @@
 [
 	{
+		"name": "Harmony Testnet",
+		"address": "0x7aF24c3fDb74e75C3c7751629C0C72785FDf3DAA",
+		"chainId": "0x6357d2e0",
+		"unit": "ONE"
+	},
+	{
+		"search": "bsc-testnet",
 		"name": "BSC Testnet",
 		"address": "0x851b7430Fb32E0C1c4Fb42a5ECD6Dbb2A383a7AF",
 		"chainId": "0x61",

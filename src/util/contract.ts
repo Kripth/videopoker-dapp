@@ -13,14 +13,10 @@ interface Game {
 	playable: boolean;
 }
 
-interface CreatedEvent {
-	searchId: string;
-	player: string;
-	gameId: bigint;
-}
-
 interface StartEvent {
 	gameId: string;
+	player: string;
+	searchId: string;
 	cards: string;
 }
 
@@ -105,12 +101,10 @@ export class Contract {
 	}
 
 	start(bet: bigint): Promise<StartEvent> {
-		const searchId = Math.floor(Math.random() * 2147483648);
+		const searchId = Math.floor(Math.random() * 4294967296);
 		return new Promise((success, fail) => {
+			this.event<StartEvent>("Start", { searchId, player: this.address }, success);
 			this.send("start", bet, searchId).catch(fail);
-			this.event<CreatedEvent>("Created", { searchId, player: this.address }, ({ gameId }) => {
-				this.startEvent(gameId).then(success);
-			});
 		});
 	}
 
@@ -122,8 +116,8 @@ export class Contract {
 
 	end(gameId: bigint, replace: number): Promise<EndEvent> {
 		return new Promise((success, fail) => {
-			this.send("end", 0, gameId, replace).catch(fail);
 			this.endEvent(gameId).then(success);
+			this.send("end", 0, gameId, replace).catch(fail);
 		});
 	}
 

@@ -2,6 +2,11 @@ import { useEffect, useState } from "react";
 import { createContract } from "../util/contract";
 import contracts from "../assets/contracts.json";
 
+function search(address) {
+	const info = contracts.find(o => address === o.search);
+	return info ? info.address : address;
+}
+
 export default function ContractForm({ address, setError, setContract }) {
 
 	const [ first, setFirst ] = useState(true);
@@ -51,14 +56,14 @@ export default function ContractForm({ address, setError, setContract }) {
 
 	useEffect(() => {
 		if(address) {
-			select(address);
+			select(search(address));
 		}
 	}, [address]);
 
 	return <form className="row force-margin" onSubmit={submit}>
 		<label htmlFor="input-contract" className="label">Contract</label>
 		<div className="value group">
-			<input id="input-contract" autoComplete="off" name="address" defaultValue={address || contracts[0].address} spellCheck={false} />
+			<input id="input-contract" autoComplete="off" name="address" defaultValue={address ? search(address) : contracts[0].address} spellCheck={false} />
 			<button type="submit" className={loading ? "loading" : ""} style={{width: "8rem"}}>{first ? "Use" : "Change"}</button>
 		</div>
 	</form>
