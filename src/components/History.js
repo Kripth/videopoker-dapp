@@ -83,8 +83,10 @@ export default function History({ address = "", page = 1 }) {
 			<div className="row history-component-footer">
 				<span>Page {page} of {pages}</span>
 				<div className="spacer" />
-				<Page enabled={page > 1 && pages > 1} href={`#history/${address}/${page - 1}`}>&lsaquo;</Page>
-				<Page enabled={page < pages} href={`#history/${address}/${+page + 1}`}>&rsaquo;</Page>
+				<Page enabled={page > 1 && pages > 1} title="First page" href={`#history/${address}/1`}>&laquo;</Page>
+				<Page enabled={page > 1 && pages > 1} title="Previous page" href={`#history/${address}/${page - 1}`}>&lsaquo;</Page>
+				<Page enabled={page < pages} title="Next page" href={`#history/${address}/${+page + 1}`}>&rsaquo;</Page>
+				<Page enabled={page < pages} title="Last page" href={`#history/${address}/${pages}`}>&raquo;</Page>
 			</div>
 		</> : <div className="history-component-empty">You haven't played any games yet</div>) :
 		<div className="history-component-empty">Select a contract to view your playing history</div>}
@@ -92,9 +94,9 @@ export default function History({ address = "", page = 1 }) {
 
 }
 
-function Page({ enabled, href, children }) {
+function Page({ enabled, title, href, children }) {
 	if(enabled) {
-		return <a className="nav" href={href}><button>{children}</button></a>
+		return <a className="nav" title={title} href={href}><button>{children}</button></a>
 	} else {
 		return <button className="nav" disabled>{children}</button>
 	}

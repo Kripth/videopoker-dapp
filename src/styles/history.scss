@@ -34,6 +34,13 @@
 		.history-component-footer {
 
 			flex-direction: row;
+			flex-wrap: wrap;
+			justify-content: flex-end;
+
+			span {
+				width: 100%;
+				margin-bottom: 1rem;
+			}
 
 		}
 
